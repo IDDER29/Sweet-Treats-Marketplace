@@ -1,7 +1,10 @@
+import Image from "next/image";
 import Link from "next/link";
+import { ChevronRight, Star } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Carousel,
   CarouselContent,
@@ -10,10 +13,58 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { SearchIcon, ShoppingCartIcon, UserIcon } from "lucide-react";
+const featuredProducts = [
+  {
+    id: 1,
+    name: "Chocolate Cake",
+    description: "Rich and moist chocolate cake",
+    price: "$25.99",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 2,
+    name: "Strawberry Tart",
+    description: "Fresh strawberries on a creamy base",
+    price: "$18.99",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 3,
+    name: "Macarons Set",
+    description: "Assorted flavors of French macarons",
+    price: "$15.99",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+  {
+    id: 4,
+    name: "Cinnamon Rolls",
+    description: "Soft and gooey cinnamon rolls",
+    price: "$12.99",
+    image: "/placeholder.svg?height=200&width=200",
+  },
+];
 
-export default function Home() {
+const testimonials = [
+  {
+    id: 1,
+    text: "The quality of the pastries is amazing! I love supporting local bakeries.",
+    author: "Sarah M.",
+  },
+  {
+    id: 2,
+    text: "This platform has helped my small bakery reach so many new customers!",
+    author: "John D., Sweet Treats Bakery",
+  },
+  {
+    id: 3,
+    text: "Ordering is so easy, and the delivery is always on time. Highly recommend!",
+    author: "Emily L.",
+  },
+];
+
+export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col  ">
+    <div className="flex flex-col min-h-screen">
       {/* Navigation Bar */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
@@ -34,191 +85,288 @@ export default function Home() {
           </nav>
         </div>
       </header>
-
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative h-[600px] flex items-center justify-center text-center text-white">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('/placeholder.svg?height=600&width=1200')",
-            }}
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-50" />
-          <div className="relative z-10 space-y-4">
-            <h1 className="text-4xl font-bold sm:text-5xl md:text-6xl">
-              Welcome to LocalEats
-            </h1>
-            <p className="text-xl sm:text-2xl">
-              Discover fresh, local produce at your fingertips
-            </p>
-            <div className="flex justify-center space-x-4">
-              <Button size="lg">Shop Now</Button>
-              <Button size="lg" variant="outline">
-                Sign Up for Business
-              </Button>
-            </div>
+      {/* Hero Section */}
+      <section className="relative h-[500px] flex items-center justify-center text-center text-white">
+        <Image
+          src="/placeholder.svg?height=500&width=1200"
+          alt="Delicious baked goods"
+          layout="fill"
+          objectFit="cover"
+          className="absolute inset-0 z-0"
+        />
+        <div className="absolute inset-0 bg-black bg-opacity-50 z-10"></div>
+        <div className="relative z-20 max-w-3xl mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Discover the Best Local Bakeries and Sweets Near You!
+          </h1>
+          <p className="text-xl mb-8">
+            Indulge in freshly baked goods and sweet treats from artisanal local
+            bakeries.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Button size="lg">Browse Products</Button>
+            <Button size="lg" variant="outline">
+              Sign Up
+            </Button>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Search Bar */}
-        <section className="container mx-auto mt-8">
-          <div className="relative">
-            <SearchIcon className="absolute left-2 top-3 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-8" placeholder="Search for products..." />
-          </div>
-        </section>
-
-        {/* Categories Section */}
-        <section className="container mx-auto mt-12">
-          <h2 className="text-2xl font-bold mb-4">Categories</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {["Bakery", "Produce", "Dairy", "Meat", "Seafood", "Pantry"].map(
-              (category) => (
-                <Card
-                  key={category}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardContent className="p-4 text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 bg-muted rounded-full flex items-center justify-center">
-                      {/* Replace with actual category icons */}
-                      <span className="text-2xl">🍎</span>
-                    </div>
-                    <h3 className="font-medium">{category}</h3>
-                  </CardContent>
-                </Card>
-              )
-            )}
-          </div>
-        </section>
-
-        {/* Featured Products Carousel */}
-        <section className="container mx-auto mt-12">
-          <h2 className="text-2xl font-bold mb-4">Featured Products</h2>
-          <Carousel className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl mx-auto">
-            <CarouselContent>
-              {[1, 2, 3, 4, 5].map((product) => (
-                <CarouselItem key={product}>
-                  <Card>
-                    <CardContent className="flex aspect-square items-center justify-center p-6">
-                      <div className="text-center">
-                        <img
-                          src={`/placeholder.svg?height=200&width=200&text=Product+${product}`}
-                          alt={`Product ${product}`}
-                          className="mx-auto mb-4 rounded-md"
-                        />
-                        <h3 className="font-medium mb-2">Product {product}</h3>
-                        <p className="text-muted-foreground mb-4">$9.99</p>
-                        <Button>Add to Cart</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
-          </Carousel>
-        </section>
-
-        {/* Testimonials */}
-        <section className="container mx-auto mt-12 mb-12">
-          <h2 className="text-2xl font-bold mb-4">What Our Customers Say</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Alice Johnson",
-                role: "Customer",
-                text: "LocalEats has transformed how I shop for groceries. The produce is always fresh and I love supporting local businesses!",
-              },
-              {
-                name: "Bob Smith",
-                role: "Business Owner",
-                text: "As a small farm owner, LocalEats has given me a platform to reach more customers than I ever could on my own.",
-              },
-              {
-                name: "Carol Davis",
-                role: "Customer",
-                text: "The variety of local products available is amazing. It's like having a farmer's market at my fingertips every day!",
-              },
-            ].map((testimonial, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 rounded-full bg-muted mr-4"></div>
-                    <div>
-                      <h3 className="font-medium">{testimonial.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {testimonial.role}
-                      </p>
-                    </div>
+      {/* Featured Products Section */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-8 text-center">
+            Featured Products
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredProducts.map((product) => (
+              <Card key={product.id} className="overflow-hidden">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  width={200}
+                  height={200}
+                  className="w-full h-48 object-cover"
+                />
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
+                  <p className="text-muted-foreground mb-2">
+                    {product.description}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold">{product.price}</span>
+                    <Button size="sm">Add to Cart</Button>
                   </div>
-                  <p className="text-muted-foreground">{testimonial.text}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="bg-muted py-6">
+      {/* Why Choose Us Section */}
+      <section className="py-16 bg-muted">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-bold mb-4">About Us</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/about">Our Story</Link>
-                </li>
-                <li>
-                  <Link href="/team">Our Team</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">Contact</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/contact">Get in Touch</Link>
-                </li>
-                <li>
-                  <Link href="/support">Support</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/privacy">Privacy Policy</Link>
-                </li>
-                <li>
-                  <Link href="/terms">Terms of Service</Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-bold mb-4">Follow Us</h3>
-              <div className="flex space-x-4">
-                {/* Replace with actual social media icons */}
-                <a href="#" className="text-foreground hover:text-primary">
-                  FB
-                </a>
-                <a href="#" className="text-foreground hover:text-primary">
-                  TW
-                </a>
-                <a href="#" className="text-foreground hover:text-primary">
-                  IG
-                </a>
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            Why Choose Us
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <svg
+                  className="w-12 h-12 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                  />
+                </svg>
               </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Support Local Businesses
+              </h3>
+              <p className="text-muted-foreground">
+                Help your community thrive by supporting local bakeries and
+                artisans.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <svg
+                  className="w-12 h-12 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Freshly Made by Artisans
+              </h3>
+              <p className="text-muted-foreground">
+                Enjoy high-quality, freshly baked goods made with passion and
+                expertise.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="mb-4 flex justify-center">
+                <svg
+                  className="w-12 h-12 text-primary"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">
+                Easy Delivery Options
+              </h3>
+              <p className="text-muted-foreground">
+                Convenient delivery right to your doorstep, ensuring freshness
+                and quality.
+              </p>
             </div>
           </div>
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            © 2023 LocalEats. All rights reserved.
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold mb-12 text-center">
+            What Our Customers Say
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial) => (
+              <Card key={testimonial.id} className="bg-muted">
+                <CardContent className="p-6">
+                  <div className="flex mb-4">
+                    <Star className="text-yellow-400 fill-current" />
+                    <Star className="text-yellow-400 fill-current" />
+                    <Star className="text-yellow-400 fill-current" />
+                    <Star className="text-yellow-400 fill-current" />
+                    <Star className="text-yellow-400 fill-current" />
+                  </div>
+                  <p className="mb-4 italic">"{testimonial.text}"</p>
+                  <p className="font-semibold">- {testimonial.author}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-muted py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="font-semibold text-lg mb-4">About Us</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Our Story
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Careers
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-4">Support</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Contact Us
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Shipping & Returns
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-4">Legal</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Cookie Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-4">Newsletter</h3>
+              <p className="text-muted-foreground mb-4">
+                Stay updated with our latest offers and products.
+              </p>
+              <form className="flex">
+                <Input
+                  type="email"
+                  placeholder="Your email"
+                  className="rounded-r-none"
+                />
+                <Button type="submit" className="rounded-l-none">
+                  Subscribe
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-muted-foreground/20 text-center text-muted-foreground">
+            <p>&copy; 2023 Local Bakery Marketplace. All rights reserved.</p>
           </div>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
