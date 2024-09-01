@@ -1,58 +1,83 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 
-const LoginForm = () => {
+export default function BusinessSignIn() {
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>
-          Welcome back to SweetTreats Marketplace
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  placeholder="john@example.com"
-                  type="email"
-                  className="pl-8"
-                />
-              </div>
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-bold tracking-tight">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Welcome back to the Bakery Marketplace
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" action="#" method="POST">
+          <div className="space-y-4 rounded-md shadow-sm">
+            <div>
+              <Label htmlFor="email-address">Email address</Label>
+              <Input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="mt-1"
+                placeholder="bakery@example.com"
+              />
             </div>
-            <div className="flex flex-col space-y-1.5">
+            <div>
               <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type="password" className="pl-8" />
-              </div>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                className="mt-1"
+                placeholder="••••••••"
+              />
             </div>
           </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col items-center">
-        <Button className="w-full mb-2">Login</Button>
-        <a href="#" className="text-sm text-blue-600 hover:underline">
-          Forgot Password?
-        </a>
-      </CardFooter>
-    </Card>
-  );
-};
 
-export default LoginForm;
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Checkbox id="remember-me" />
+              <Label htmlFor="remember-me" className="ml-2 block text-sm">
+                Remember me
+              </Label>
+            </div>
+
+            <div className="text-sm">
+              <a
+                href="#"
+                className="font-medium text-primary hover:text-primary/80"
+              >
+                Forgot your password?
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <Button type="submit" className="w-full">
+              Sign in
+            </Button>
+          </div>
+        </form>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Don't have an account?{" "}
+          <a
+            href="#"
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            Register your business
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}

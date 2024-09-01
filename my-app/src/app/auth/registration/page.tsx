@@ -1,88 +1,117 @@
-"use client";
-import { useState } from "react";
-import { User, Mail, Lock } from "lucide-react";
-
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-const RegistrationForm = () => {
-  const [userType, setUserType] = useState("customer");
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
+export default function BusinessRegistration() {
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Create an Account</CardTitle>
-        <CardDescription>Join SweetTreats Marketplace today</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Name</Label>
-              <div className="relative">
-                <User className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="name" placeholder="John Doe" className="pl-8" />
-              </div>
+    <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-bold tracking-tight">
+            Register Your Bakery Business
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Join our marketplace and reach more customers
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" action="#" method="POST">
+          <div className="space-y-4 rounded-md shadow-sm">
+            <div>
+              <Label htmlFor="business-name">Business Name</Label>
+              <Input
+                id="business-name"
+                name="business-name"
+                type="text"
+                required
+                className="mt-1"
+                placeholder="Your Bakery Name"
+              />
             </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  placeholder="john@example.com"
-                  type="email"
-                  className="pl-8"
-                />
-              </div>
+            <div>
+              <Label htmlFor="email-address">Email address</Label>
+              <Input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="mt-1"
+                placeholder="bakery@example.com"
+              />
             </div>
-            <div className="flex flex-col space-y-1.5">
+            <div>
               <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="password" type="password" className="pl-8" />
-              </div>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="mt-1"
+                placeholder="••••••••"
+              />
             </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input id="confirmPassword" type="password" className="pl-8" />
-              </div>
+            <div>
+              <Label htmlFor="business-type">Business Type</Label>
+              <Select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select business type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bakery">Bakery</SelectItem>
+                  <SelectItem value="cafe">Café</SelectItem>
+                  <SelectItem value="patisserie">Patisserie</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label>User Type</Label>
-              <RadioGroup defaultValue="customer" onValueChange={setUserType}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="customer" id="customer" />
-                  <Label htmlFor="customer">Customer</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="business" id="business" />
-                  <Label htmlFor="business">Business Owner</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="delivery" id="delivery" />
-                  <Label htmlFor="delivery">Delivery Provider</Label>
-                </div>
-              </RadioGroup>
+            <div>
+              <Label htmlFor="address">Business Address</Label>
+              <Input
+                id="address"
+                name="address"
+                type="text"
+                required
+                className="mt-1"
+                placeholder="123 Bakery St, City, State, ZIP"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="terms" />
+              <label
+                htmlFor="terms"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                I agree to the terms and conditions
+              </label>
             </div>
           </div>
+
+          <div>
+            <Button type="submit" className="w-full">
+              Register Business
+            </Button>
+          </div>
         </form>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full">Register</Button>
-      </CardFooter>
-    </Card>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <a
+            href="#"
+            className="font-medium text-primary hover:text-primary/80"
+          >
+            Sign in
+          </a>
+        </p>
+      </div>
+    </div>
   );
-};
-export default RegistrationForm;
+}
