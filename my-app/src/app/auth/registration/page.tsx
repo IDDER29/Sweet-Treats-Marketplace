@@ -26,7 +26,7 @@ export default function BusinessRegistration() {
     agreeToTerms: false,
   });
 
-  let [agreeToTerms, setagreeToTerms] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -40,11 +40,17 @@ export default function BusinessRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.agreeToTerms) {
+      setError("You must agree to the terms and conditions.");
+      return;
+    }
 
     try {
-      const response = registerBusiness(formData);
+      await registerBusiness(formData);
+      // Handle successful registration here (e.g., redirect or show a success message)
     } catch (error) {
       console.error("An error occurred:", error);
+      setError("Failed to register business. Please try again.");
     }
   };
 
@@ -59,6 +65,9 @@ export default function BusinessRegistration() {
             Join our marketplace and reach more customers
           </p>
         </div>
+        {error && (
+          <p className="mt-2 text-center text-sm text-red-500">{error}</p>
+        )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div className="flex gap-2">
@@ -103,9 +112,9 @@ export default function BusinessRegistration() {
               />
             </div>
             <div>
-              <Label htmlFor="business-name">Business Name</Label>
+              <Label htmlFor="businessName">Business Name</Label>
               <Input
-                id="business-name"
+                id="businessName"
                 name="businessName"
                 type="text"
                 required
@@ -117,8 +126,16 @@ export default function BusinessRegistration() {
             </div>
 
             <div>
-              <Label htmlFor="business-type">Business Type</Label>
-              <Select name="businessType" onChange={handleChange}>
+              <Label htmlFor="businessType">Business Type</Label>
+              <Select
+                name="businessType"
+                value={formData.businessType}
+                onValueChange={(value) =>
+                  handleChange({
+                    target: { name: "businessType", value },
+                  } as any)
+                }
+              >
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select business type" />
                 </SelectTrigger>
@@ -144,9 +161,9 @@ export default function BusinessRegistration() {
               />
             </div>
             <div>
-              <Label htmlFor="email-address">Email Address</Label>
+              <Label htmlFor="email">Email Address</Label>
               <Input
-                id="email-address"
+                id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
@@ -176,10 +193,8 @@ export default function BusinessRegistration() {
               <Checkbox
                 id="terms"
                 name="agreeToTerms"
-                checked={agreeToTerms}
-                onClick={() => {
-                  setagreeToTerms(!agreeToTerms);
-                }}
+                checked={formData.agreeToTerms}
+                onChange={handleChange}
               />
               <label
                 htmlFor="terms"
