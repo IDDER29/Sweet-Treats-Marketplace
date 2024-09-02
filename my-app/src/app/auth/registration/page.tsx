@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,8 +11,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { registerBusiness } from "@/utils/api";
 
 export default function BusinessRegistration() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    businessName: "",
+    email: "",
+    password: "",
+    businessType: "",
+    address: "",
+    phoneNumber: "",
+    agreeToTerms: false,
+  });
+
+  let [agreeToTerms, setagreeToTerms] = useState(false);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = registerBusiness(formData);
+    } catch (error) {
+      console.error("An error occurred:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-8">
@@ -23,46 +59,66 @@ export default function BusinessRegistration() {
             Join our marketplace and reach more customers
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
+            <div className="flex gap-2">
+              <div>
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  required
+                  className="mt-1"
+                  placeholder="John"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  required
+                  className="mt-1"
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="phoneNumber">Phone Number</Label>
+              <Input
+                id="phoneNumber"
+                name="phoneNumber"
+                type="text"
+                required
+                className="mt-1"
+                placeholder="+1234567890"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+              />
+            </div>
             <div>
               <Label htmlFor="business-name">Business Name</Label>
               <Input
                 id="business-name"
-                name="business-name"
+                name="businessName"
                 type="text"
                 required
                 className="mt-1"
                 placeholder="Your Bakery Name"
+                value={formData.businessName}
+                onChange={handleChange}
               />
             </div>
-            <div>
-              <Label htmlFor="email-address">Email address</Label>
-              <Input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1"
-                placeholder="bakery@example.com"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="mt-1"
-                placeholder="••••••••"
-              />
-            </div>
+
             <div>
               <Label htmlFor="business-type">Business Type</Label>
-              <Select>
+              <Select name="businessType" onChange={handleChange}>
                 <SelectTrigger className="mt-1">
                   <SelectValue placeholder="Select business type" />
                 </SelectTrigger>
@@ -83,10 +139,48 @@ export default function BusinessRegistration() {
                 required
                 className="mt-1"
                 placeholder="123 Bakery St, City, State, ZIP"
+                value={formData.address}
+                onChange={handleChange}
               />
             </div>
+            <div>
+              <Label htmlFor="email-address">Email Address</Label>
+              <Input
+                id="email-address"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                className="mt-1"
+                placeholder="bakery@example.com"
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                className="mt-1"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={handleChange}
+              />
+            </div>
+
             <div className="flex items-center space-x-2">
-              <Checkbox id="terms" />
+              <Checkbox
+                id="terms"
+                name="agreeToTerms"
+                checked={agreeToTerms}
+                onClick={() => {
+                  setagreeToTerms(!agreeToTerms);
+                }}
+              />
               <label
                 htmlFor="terms"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
