@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { doSocialLogin } from "@/app/actions";
 
 export default function BusinessSignIn() {
   return (
@@ -16,7 +17,7 @@ export default function BusinessSignIn() {
             Welcome back to the Bakery Marketplace
           </p>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" action={doSocialLogin} method="POST">
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <Label htmlFor="email-address">Email address</Label>
@@ -63,13 +64,34 @@ export default function BusinessSignIn() {
           </div>
 
           <div>
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              name="action"
+              value="logIn"
+              className="w-full"
+            >
               Sign in
             </Button>
           </div>
         </form>
+
+        <hr />
+
+        <form action={doSocialLogin}>
+          <div>
+            <Button
+              type="submit"
+              name="action"
+              value="google"
+              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
+            >
+              Sign in With google
+            </Button>
+          </div>
+        </form>
+
         <p className="mt-2 text-center text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <a
             href="#"
             className="font-medium text-primary hover:text-primary/80"
