@@ -1,11 +1,33 @@
 "use server";
 // utils/api.ts
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
-export const registerBusiness = async (data: any) => {
+interface BusinessRegistrationData {
+  firstName: string;
+  lastName: string;
+  businessName: string;
+  email: string;
+  password: string;
+  businessType: string;
+  address: string;
+  phoneNumber: string;
+  agreeToTerms: boolean;
+}
+
+interface ApiResponse {
+  success: boolean;
+  message: string;
+  data?: any;
+}
+
+export const registerBusiness = async (
+  data: BusinessRegistrationData
+): Promise<ApiResponse> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/users/register`,
+    const response: AxiosResponse = await axios.post(
+      `${apiUrl}/business/register`,
       data,
       {
         headers: {
@@ -15,13 +37,24 @@ export const registerBusiness = async (data: any) => {
     );
 
     if (response.status === 200 || response.status === 201) {
-      // Handle successful registration (e.g., redirect to login or show success message)
-      console.log("Business registered successfully");
+      return {
+        success: true,
+        message: "Business registered successfully.",
+        data: response.data,
+      };
     } else {
-      // Handle errors
-      console.error("Failed to register business");
+      return {
+        success: false,
+        message: "Failed to register business. Please try again.",
+      };
     }
-  } catch (error) {
-    console.error("An error occurred:", error);
+  } catch (error: any) {
+    console.error("API Error:", error.response || error.message);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "An error occurred during registration.",
+    };
   }
 };

@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { registerBusiness } from "@/utils/api";
-
+import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 export default function BusinessRegistration() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -23,22 +24,20 @@ export default function BusinessRegistration() {
     businessType: "",
     address: "",
     phoneNumber: "",
-    agreeToTerms: false,
+    agreeToTerms: true,
   });
 
   const [error, setError] = useState("");
-
+  const router = useRouter();
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | any>
   ) => {
-    const { name, value, type } = e.target;
-    const checked = type === "checkbox" ? e.target.checked : false;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.agreeToTerms) {
@@ -47,14 +46,19 @@ export default function BusinessRegistration() {
     }
 
     try {
-      await registerBusiness(formData);
-      // Handle successful registration here (e.g., redirect or show a success message)
+      setError("");
+      const response = await registerBusiness(formData);
+
+      if (response.success) {
+        // Redirect to the login page after successful registration
+        router.push("/auth/login");
+      } else {
+        setError(response.message);
+      }
     } catch (error) {
-      console.error("An error occurred:", error);
-      setError("Failed to register business. Please try again.");
+      setError("Failed to register business. Please try again later.");
     }
   };
-
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-8">
@@ -66,9 +70,7 @@ export default function BusinessRegistration() {
             Join our marketplace and reach more customers
           </p>
         </div>
-        {error && (
-          <p className="mt-2 text-center text-sm text-red-500">{error}</p>
-        )}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div className="flex gap-2">
@@ -195,7 +197,13 @@ export default function BusinessRegistration() {
                 id="terms"
                 name="agreeToTerms"
                 checked={formData.agreeToTerms}
-                onChange={handleChange}
+                onClick={() => {
+                  setFormData({
+                    ...formData,
+                    agreeToTerms: !formData.agreeToTerms,
+                  });
+                  setError("");
+                }}
               />
               <label
                 htmlFor="terms"
@@ -212,6 +220,9 @@ export default function BusinessRegistration() {
             </Button>
           </div>
         </form>
+        {error && (
+          <p className="mt-2 text-center text-sm text-red-500">{error}</p>
+        )}
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
           <a
