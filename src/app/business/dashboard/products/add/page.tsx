@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import UploadThing from "@/components/upload/UploadButton";
 
 export default function ProductDataEntryPage() {
   return (
@@ -25,7 +27,7 @@ export default function ProductDataEntryPage() {
           <form className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="product-name">Product Name</Label>
+                <Label htmlFor="product-name">Product Title</Label>
                 <Input id="product-name" placeholder="Enter product name" />
               </div>
               <div className="space-y-2">
@@ -48,7 +50,7 @@ export default function ProductDataEntryPage() {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid  gap-6">
               <div className="space-y-2">
                 <Label htmlFor="product-category">Category</Label>
                 <Select>
@@ -63,14 +65,16 @@ export default function ProductDataEntryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="product-stock">Stock Quantity</Label>
-                <Input id="product-stock" type="number" placeholder="0" />
-              </div>
             </div>
 
             <div className="space-y-2">
               <Label>Product Images</Label>
+              <div
+                key="Drag and drop"
+                className="h-5/6 bg-gray-100  flex items-center justify-center bg-green-500 h-60 rounded-lg"
+              >
+                <UploadThing />
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div
@@ -110,15 +114,6 @@ export default function ProductDataEntryPage() {
               <Textarea
                 id="product-ingredients"
                 placeholder="List the ingredients"
-                rows={3}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="product-nutrition">Nutrition Information</Label>
-              <Textarea
-                id="product-nutrition"
-                placeholder="Enter nutrition details"
                 rows={3}
               />
             </div>

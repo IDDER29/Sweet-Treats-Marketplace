@@ -28,7 +28,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 export default function ProductsPage() {
   return (
@@ -42,18 +44,18 @@ export default function ProductsPage() {
             className="max-w-sm"
           />
           <Dialog>
-            <DialogTrigger asChild>
+            <Link href="/business/dashboard/products/add">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Product
               </Button>
-            </DialogTrigger>
+            </Link>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
                 <DialogDescription>
                   Enter the details of the new product here. Click save when
-                  you're done.
+                  you&apos;re done.
                 </DialogDescription>
               </DialogHeader>
               <form className="space-y-4">
@@ -162,7 +164,7 @@ export default function ProductsPage() {
               ].map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <img
+                    <Image
                       src={product.image}
                       alt={product.name}
                       className="w-10 h-10 rounded-full"
