@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { registerBusiness } from "@/utils/api";
 import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 export default function BusinessRegistration() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -73,8 +74,8 @@ export default function BusinessRegistration() {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
-            <div className="flex gap-2">
-              <div>
+            <div className="flex gap-2 w-full">
+              <div className="flex-1">
                 <Label htmlFor="firstName">First Name</Label>
                 <Input
                   id="firstName"
@@ -87,7 +88,7 @@ export default function BusinessRegistration() {
                   onChange={handleChange}
                 />
               </div>
-              <div>
+              <div className="flex-1">
                 <Label htmlFor="lastName">Last Name</Label>
                 <Input
                   id="lastName"
@@ -225,12 +226,12 @@ export default function BusinessRegistration() {
         )}
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <a
-            href="#"
+          <Link
+            href="/auth/login"
             className="font-medium text-primary hover:text-primary/80"
           >
             Sign in
-          </a>
+          </Link>
         </p>
       </div>
     </div>

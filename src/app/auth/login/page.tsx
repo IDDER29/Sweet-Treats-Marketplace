@@ -1,11 +1,33 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { doSocialLogin } from "@/app/actions";
+import SocialLogin from "@/components/SocialLogin";
+import { doCredentialLogin } from "@/app/actions";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function BusinessSignIn() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+  async function handleFormSubmit(event: any) {
+    event.preventDefault();
+    try {
+      setError("");
+      const formData = new FormData(event.currentTarget);
+      const response = await doCredentialLogin(formData);
+      if (!!response.error) {
+        setError(response.error.message);
+      } else {
+        router.push("/business/profile");
+      }
+    } catch (error) {
+      setError("Invalid credentials");
+    }
+  }
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md space-y-8">
@@ -17,7 +39,8 @@ export default function BusinessSignIn() {
             Welcome back to the Bakery Marketplace
           </p>
         </div>
-        <form className="mt-8 space-y-6" action={doSocialLogin} method="POST">
+
+        <form className="mt-8 space-y-6" onSubmit={handleFormSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
               <Label htmlFor="email-address">Email address</Label>
@@ -44,7 +67,11 @@ export default function BusinessSignIn() {
               />
             </div>
           </div>
-
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative w-full mb-4">
+              {error}
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Checkbox id="remember-me" />
@@ -77,27 +104,16 @@ export default function BusinessSignIn() {
 
         <hr />
 
-        <form action={doSocialLogin}>
-          <div>
-            <Button
-              type="submit"
-              name="action"
-              value="google"
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-            >
-              Sign in With google
-            </Button>
-          </div>
-        </form>
+        <SocialLogin />
 
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <a
-            href="#"
+          <Link
+            href="/auth/register"
             className="font-medium text-primary hover:text-primary/80"
           >
             Register your business
-          </a>
+          </Link>
         </p>
       </div>
     </div>

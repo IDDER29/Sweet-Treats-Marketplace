@@ -58,3 +58,80 @@ export const registerBusiness = async (
     };
   }
 };
+
+export const getBusinessesByEmail = async (
+  email: string
+): Promise<ApiResponse> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+
+  try {
+    const response: AxiosResponse = await axios.get(
+      `${apiUrl}/business/email/${email}`
+    );
+
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: "Businesses fetched successfully.",
+        data: response.data,
+      };
+    } else {
+      return {
+        success: false,
+        message: "Failed to fetch businesses. Please try again.",
+      };
+    }
+  } catch (error: any) {
+    console.error("API Error:", error.response || error.message);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "An error occurred while fetching businesses.",
+    };
+  }
+};
+
+export const businessesLogIn = async (
+  email: string,
+  password: string
+): Promise<ApiResponse> => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+
+  try {
+    const response: AxiosResponse = await axios.post(
+      `${apiUrl}/business/login`,
+      { email, password },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log(
+      "response ____________________________________________________**************************************************________________________________",
+      response.business
+    );
+
+    if (response.status === 201) {
+      return {
+        success: true,
+        message: "Businesses fetched successfully.",
+        data: response.data,
+      };
+    } else {
+      return {
+        success: false,
+        message: "Failed to fetch businesses. Please try again.",
+      };
+    }
+  } catch (error: any) {
+    console.error("API Error:", error.response || error.message);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        "An error occurred while fetching businesses.",
+    };
+  }
+};

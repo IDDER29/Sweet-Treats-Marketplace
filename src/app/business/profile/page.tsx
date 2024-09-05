@@ -27,8 +27,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import { doLogout } from "@/app/actions";
 
-export default function StoreProfilePage() {
+export default async function StoreProfilePage() {
+  const session = await auth();
+  if (!session?.user) redirect("/auth/login");
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
@@ -37,7 +42,10 @@ export default function StoreProfilePage() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-8 w-8 rounded-full">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg" alt="Store Owner" />
+                <AvatarImage
+                  src={session?.user?.image ?? ""}
+                  alt="Store Owner Image"
+                />
                 <AvatarFallback>SD</AvatarFallback>
               </Avatar>
             </Button>
@@ -45,9 +53,11 @@ export default function StoreProfilePage() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">John Doe</p>
+                <p className="text-sm font-medium leading-none">
+                  {session?.user?.name}
+                </p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  john@sweetdelights.com
+                  {session?.user?.email}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -63,7 +73,9 @@ export default function StoreProfilePage() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <form action={doLogout} method="post">
+                <button type="submit">Log out</button>
+              </form>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
