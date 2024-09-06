@@ -73,19 +73,6 @@ export default function ProductDataEntryPage() {
               <div key="Drag and drop flex ">
                 <UploadThing />
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <Image
-                    key={i}
-                    alt="Product Image"
-                    src={
-                      "https://utfs.io/f/bba23788-074a-4a68-94e4-233456157c27-f3r1i.jpg"
-                    }
-                    width={500}
-                    height={500}
-                  ></Image>
-                ))}
-              </div>
             </div>
 
             <div className="space-y-4">
