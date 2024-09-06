@@ -167,6 +167,8 @@ export default function ProductsPage() {
                     <Image
                       src={product.image}
                       alt={product.name}
+                      width={50}
+                      height={50}
                       className="w-10 h-10 rounded-full"
                     />
                   </TableCell>

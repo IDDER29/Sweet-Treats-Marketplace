@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import UploadThing from "@/components/upload/UploadButton";
+import Image from "next/image";
 
 export default function ProductDataEntryPage() {
   return (
@@ -69,20 +70,20 @@ export default function ProductDataEntryPage() {
 
             <div className="space-y-2">
               <Label>Product Images</Label>
-              <div
-                key="Drag and drop"
-                className="h-5/6 bg-gray-100  flex items-center justify-center bg-green-500 h-60 rounded-lg"
-              >
+              <div key="Drag and drop flex ">
                 <UploadThing />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
-                  <div
+                  <Image
                     key={i}
-                    className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center"
-                  >
-                    <Button variant="ghost">Add Image {i}</Button>
-                  </div>
+                    alt="Product Image"
+                    src={
+                      "https://utfs.io/f/bba23788-074a-4a68-94e4-233456157c27-f3r1i.jpg"
+                    }
+                    width={500}
+                    height={500}
+                  ></Image>
                 ))}
               </div>
             </div>
