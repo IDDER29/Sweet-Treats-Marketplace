@@ -7,6 +7,8 @@ import { Search, Menu, ShoppingCart, Star, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function HomePage() {
   return (
     <>
@@ -277,6 +279,7 @@ export default function HomePage() {
           </div>
         </footer>
       </div>
+      <ToastContainer />
     </>
   );
 }

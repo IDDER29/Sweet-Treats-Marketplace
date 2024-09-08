@@ -1,6 +1,8 @@
 "use server";
 // utils/api.ts
 import axios, { AxiosResponse } from "axios";
+import axiosInstance from "@/lib/axios";
+import { auth } from "@/auth";
 
 interface BusinessRegistrationData {
   firstName: string;
@@ -108,10 +110,6 @@ export const businessesLogIn = async (
         },
       }
     );
-    console.log(
-      "response ____________________________________________________**************************************************________________________________",
-      response.business
-    );
 
     if (response.status === 201) {
       return {
@@ -133,5 +131,31 @@ export const businessesLogIn = async (
         error.response?.data?.message ||
         "An error occurred while fetching businesses.",
     };
+  }
+};
+
+// Function to send product data to the server
+export const createNewProduct = async (productData: any) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
+
+    const response = await axios.post(`${apiUrl}/products`, productData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting product:", error);
+    throw error;
   }
 };

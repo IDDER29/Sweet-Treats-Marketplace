@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { businessesLogIn, getBusinessesByEmail } from "./utils/api";
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -9,7 +10,7 @@ export const {
   signOut,
 } = NextAuth({
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Use JWT strategy for sessions
   },
   providers: [
     CredentialsProvider({
@@ -26,7 +27,6 @@ export const {
               credentials.email,
               credentials.password
             );
-            console.log("response", response);
             if (response?.success) {
               return {
                 id: businesses.data.id, // return user details
@@ -48,7 +48,6 @@ export const {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-
       authorization: {
         params: {
           access_type: "offline",
@@ -58,4 +57,20 @@ export const {
       },
     }),
   ],
+  callbacks: {
+    // JWT callback to include user ID
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id; // Store the user ID in the token
+      }
+      return token;
+    },
+    // Session callback to pass user ID to the session
+    async session({ session, token }) {
+      if (token?.id) {
+        session.user.id = token.id; // Add user ID to the session
+      }
+      return session;
+    },
+  },
 });

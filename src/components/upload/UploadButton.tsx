@@ -1,17 +1,22 @@
 "use client";
-
 import { useState } from "react";
 import { UploadDropzone } from "@/utils/uploadthing";
 import Link from "next/link";
 import Image from "next/image";
-import { ClipLoader } from "react-spinners"; // Spinner component
+import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify"; // Importing toast
 
-export default function UploadThing() {
-  const [images, setImages] = useState<
-    { url: string; name: string; key: string }[]
-  >([]);
-  const [isUploading, setIsUploading] = useState(false); // Uploading state
-  const [isDeleting, setIsDeleting] = useState(false); // Deleting state
+export default function UploadThing({
+  images,
+  onAddImages,
+  onDeleteImage,
+}: {
+  images: any[];
+  onAddImages: (images: any[]) => void;
+  onDeleteImage: (key: string) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async (fileId: string) => {
     setIsDeleting(true);
@@ -21,19 +26,17 @@ export default function UploadThing() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ fileId }), // Ensure fileId is being sent as JSON
+        body: JSON.stringify({ fileId }),
       }).then((res) => res.json());
 
       if (result.success) {
-        setImages((prevImages) =>
-          prevImages.filter((image) => image.key !== fileId)
-        );
-        console.log("File deleted successfully");
+        onDeleteImage(fileId); // Using the onDeleteImage prop
+        toast.success("File deleted successfully");
       } else {
-        console.error("Failed to delete file");
+        toast.error("Failed to delete file");
       }
     } catch (error) {
-      console.error("Error deleting file:", error);
+      toast.error("Error deleting file");
     } finally {
       setIsDeleting(false);
     }
@@ -89,23 +92,20 @@ export default function UploadThing() {
         onClientUploadComplete={(res) => {
           setIsUploading(false); // Stop spinner
           if (res) {
-            setImages((prevImages) => [
-              ...prevImages,
-              ...res.map((image) => ({
-                url: image.url,
-                name: image.name,
-                key: image.key,
-              })),
-            ]);
-            console.log("Uploaded images: ", JSON.stringify(res));
+            const newImages = res.map((image) => ({
+              url: image.url,
+              name: image.name,
+              key: image.key,
+            }));
+            onAddImages(newImages); // Using onAddImages prop
+            toast.success("Images uploaded successfully");
           }
-          alert("Upload Completed");
         }}
         onUploadError={(error: Error) => {
-          setIsUploading(false); // Stop spinner
-          alert(`ERROR! ${error.message}`);
+          setIsUploading(false);
+          toast.error(`Upload error: ${error.message}`);
         }}
-        onUploadBegin={() => setIsUploading(true)} // Start spinner
+        onUploadBegin={() => setIsUploading(true)}
       />
 
       {isUploading && (
