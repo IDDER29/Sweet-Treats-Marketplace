@@ -10,6 +10,7 @@ function InputField({
   required,
   min,
   onChange,
+  value,
 }: any) {
   return (
     <div className="space-y-2">
@@ -21,6 +22,7 @@ function InputField({
         step={step}
         required={required}
         min={min}
+        value={value}
         onChange={onChange}
       />
     </div>

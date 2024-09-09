@@ -41,6 +41,7 @@ export default function ProductDataEntryPage() {
   const [productCalories, setProductCalories] = useState("");
   const [productMacronutrients, setProductMacronutrients] = useState("");
   const [productSize, setProductSize] = useState("");
+  const [productCategory, setProductCategory] = useState("");
   const [productWeight, setProductWeight] = useState("");
   const [productShelfLife, setProductShelfLife] = useState("");
   const [productStorageInstructions, setProductStorageInstructions] =
@@ -67,6 +68,7 @@ export default function ProductDataEntryPage() {
     const productData = {
       name: productName, // Assuming `productName` is stored in state
       price: Number(productPrice), // Similarly, you may have `productPrice` in state
+      category: productCategory,
       description: productDescription,
       ingredients: productIngredients,
       allergens: productAllergens,
@@ -130,6 +132,14 @@ export default function ProductDataEntryPage() {
                   onChange={(e) => setProductPrice(e.target.value)}
                 />
               </div>
+              <SelectField
+                id="product-category"
+                label="Category *"
+                options={["Bread", "Pastry", "Cake", "Cookie"]}
+                value={productCategory}
+                onChange={(value) => setProductCategory(value)} // Directly use value
+                required
+              />
               <TextareaField
                 id="product-description"
                 label="Product Description"

@@ -159,3 +159,112 @@ export const createNewProduct = async (productData: any) => {
     throw error;
   }
 };
+
+export const getBusinessesProducts = async () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
+
+    const response = await axios.get(`${apiUrl}/products`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting product:", error);
+    throw error;
+  }
+};
+
+export const deleteProductById = async (id: string) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
+
+    const response = await axios.delete(`${apiUrl}/products/${id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting product:", error);
+    throw error;
+  }
+};
+
+// utils/api.ts
+export async function getProductById(productId: string) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  console.log(
+    "ididid:*********************************************************_____________________________________________________________________________******************************************************",
+    { productId }
+  );
+  try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
+    const response = await axios.get(`${apiUrl}/products/${productId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+}
+
+export async function updateProduct(
+  productId: string,
+  updatedProductData: any
+) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
+    const response = await axios.put(
+      `${apiUrl}/products/${productId}`,
+      updatedProductData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+}

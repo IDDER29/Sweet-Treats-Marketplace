@@ -4,6 +4,7 @@ import { BarChart, Truck, Package, Home, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 
 const Sidebar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,34 +28,34 @@ const Sidebar = () => {
       <ScrollArea className="flex-grow">
         <nav className="space-y-2 p-4">
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/dashboard">
+            <Link href="/business/dashboard">
               <Home className="mr-2 h-4 w-4" />
               Dashboard
-            </a>
+            </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/dashboard/sales">
+            <Link href="/business/dashboard/sales">
               <BarChart className="mr-2 h-4 w-4" />
               Sales
-            </a>
+            </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/dashboard/delivery">
+            <Link href="/business/dashboard/delivery">
               <Truck className="mr-2 h-4 w-4" />
               Delivery
-            </a>
+            </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/dashboard/products">
+            <Link href="/business/dashboard/products">
               <Package className="mr-2 h-4 w-4" />
               Products
-            </a>
+            </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <a href="/dashboard/settings">
+            <Link href="/business/settings">
               <Settings className="mr-2 h-4 w-4" />
               Settings
-            </a>
+            </Link>
           </Button>
         </nav>
       </ScrollArea>
