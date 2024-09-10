@@ -24,7 +24,12 @@ interface ImageObject {
 const imageReducer = (state: ImageObject[], action: any) => {
   switch (action.type) {
     case "ADD_IMAGES":
-      return [...state, ...action.payload];
+      // Replace the current images with the new ones from the payload (avoid duplication)
+      return [
+        ...new Set(
+          action.payload.map((img: ImageObject) => JSON.stringify(img))
+        ),
+      ].map((img) => JSON.parse(img));
     case "DELETE_IMAGE":
       return state.filter((img) => img.key !== action.payload);
     default:
@@ -52,23 +57,21 @@ export default function EditProductPage() {
   const [productCustomization, setProductCustomization] = useState("");
   const [seasonalAvailability, setSeasonalAvailability] = useState("");
   const [images, dispatch] = useReducer(imageReducer, []);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const searchQ = useSearchParams();
   const productId = searchParams.get("id"); // Extract productId from the URL
 
   // Fetch product data when the component mounts
   useEffect(() => {
+    setLoading(true);
     const fetchProductData = async () => {
       if (!productId) return;
 
-      setLoading(true);
       try {
         const product = await getProductById(productId as string);
-        console.log(product);
+
         setProductName(product.name);
         setProductPrice(product.price);
         setProductDescription(product.description);
@@ -86,7 +89,12 @@ export default function EditProductPage() {
         setProductVariations(product.variations);
         setProductCustomization(product.customizationOptions);
         setSeasonalAvailability(product.seasonalAvailability);
-        dispatch({ type: "ADD_IMAGES", payload: [] });
+
+        // Replace images with the fetched product's images
+        dispatch({
+          type: "ADD_IMAGES",
+          payload: product.images,
+        });
       } catch (error) {
         toast.error("Failed to load product data.");
       } finally {
@@ -98,7 +106,7 @@ export default function EditProductPage() {
   }, [productId]);
 
   const handleAddImages = (newImages: ImageObject[]) => {
-    dispatch({ type: "ADD_IMAGES", payload: newImages });
+    dispatch({ type: "ADD_IMAGES", payload: [...images, ...newImages] });
   };
 
   const handleDeleteImage = (imageKey: string) => {
@@ -127,7 +135,7 @@ export default function EditProductPage() {
       variations: productVariations,
       customizationOptions: productCustomization,
       seasonalAvailability: seasonalAvailability,
-      images: images.map((img) => img.url),
+      images: images.map((img) => img),
     };
 
     try {
@@ -142,7 +150,6 @@ export default function EditProductPage() {
   if (loading) {
     return <p>Loading...</p>;
   } else {
-    console.log(productName);
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 key={"title"} className="text-3xl font-bold mb-6">
@@ -352,7 +359,7 @@ export default function EditProductPage() {
               {/* Form Buttons */}
               <div className="flex justify-end space-x-4">
                 <Button variant="outline">Save as Draft</Button>
-                <Button type="submit">Publish Product</Button>
+                <Button type="submit">Update Product</Button>
               </div>
             </form>
           </CardContent>

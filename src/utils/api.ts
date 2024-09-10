@@ -213,10 +213,7 @@ export const deleteProductById = async (id: string) => {
 // utils/api.ts
 export async function getProductById(productId: string) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
-  console.log(
-    "ididid:*********************************************************_____________________________________________________________________________******************************************************",
-    { productId }
-  );
+
   try {
     const session = await auth(); // Get the session from NextAuth
     const sessionReq = JSON.stringify(session);

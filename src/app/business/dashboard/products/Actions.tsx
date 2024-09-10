@@ -11,7 +11,7 @@ const Actions = ({ product }: { product: any }) => {
 
   // Handle Edit
   const handleEdit = (id: string) => {
-    router.push(`/business/dashboard/products/edit/${id}`);
+    router.push(`/business/dashboard/products/edit?id=${id}`);
   };
 
   // Handle Delete
