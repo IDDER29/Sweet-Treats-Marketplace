@@ -265,3 +265,20 @@ export async function updateProduct(
     throw error; // Rethrow the error for the caller to handle
   }
 }
+
+export async function getAllProducts() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+
+  try {
+    const response = await axios.get(`${apiUrl}/products`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("response", response);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+}

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -19,71 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Star, Search, CakeSlice, Croissant, Candy } from "lucide-react";
-
-// Mock data for products
-const products = [
-  {
-    id: 1,
-    name: "Chocolate Fudge Cake",
-    description: "Rich, moist chocolate cake",
-    price: 35.99,
-    rating: 4.5,
-    category: "Cakes",
-    image: "/placeholder.svg?height=200&width=200&text=Chocolate+Cake",
-    dietary: ["gluten-free"],
-  },
-  {
-    id: 2,
-    name: "Strawberry Cheesecake",
-    description: "Creamy cheesecake with fresh strawberries",
-    price: 40.99,
-    rating: 4.7,
-    category: "Cakes",
-    image: "/placeholder.svg?height=200&width=200&text=Strawberry+Cheesecake",
-    dietary: [],
-  },
-  {
-    id: 3,
-    name: "Blueberry Muffins",
-    description: "Fluffy muffins packed with blueberries",
-    price: 12.99,
-    rating: 4.2,
-    category: "Pastries",
-    image: "/placeholder.svg?height=200&width=200&text=Blueberry+Muffins",
-    dietary: ["vegan"],
-  },
-  {
-    id: 4,
-    name: "Assorted Macarons",
-    description: "Delicate French macarons in various flavors",
-    price: 18.99,
-    rating: 4.8,
-    category: "Pastries",
-    image: "/placeholder.svg?height=200&width=200&text=Assorted+Macarons",
-    dietary: ["gluten-free"],
-  },
-  {
-    id: 5,
-    name: "Gourmet Chocolate Truffles",
-    description: "Handcrafted chocolate truffles",
-    price: 25.99,
-    rating: 4.6,
-    category: "Candies",
-    image: "/placeholder.svg?height=200&width=200&text=Chocolate+Truffles",
-    dietary: [],
-  },
-  {
-    id: 6,
-    name: "Fruit Tart",
-    description: "Buttery tart shell filled with custard and fresh fruits",
-    price: 32.99,
-    rating: 4.4,
-    category: "Pastries",
-    image: "/placeholder.svg?height=200&width=200&text=Fruit+Tart",
-    dietary: [],
-  },
-  // Add more products as needed
-];
+import { getAllProducts } from "@/utils/api";
 
 export default function ProductListingsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -95,7 +31,21 @@ export default function ProductListingsPage() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 6;
-
+  const [products, setProducts] = useState([]);
+  console.log("products: ", products);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await getAllProducts();
+      console.log("hi hi hi : ", response);
+      if (response) {
+        setProducts(response);
+      } else {
+        console.error("Error fetching products:", response.message);
+      }
+    };
+    console.log(products);
+    fetchProducts();
+  }, []);
   const filteredProducts = products.filter(
     (product) =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -211,7 +161,7 @@ export default function ProductListingsPage() {
 
       {/* Product Display Area */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {currentProducts.map((product) => (
+        {products.map((product) => (
           <Card
             key={product.id}
             className="overflow-hidden transition-shadow hover:shadow-lg"
@@ -230,17 +180,17 @@ export default function ProductListingsPage() {
               </p>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-bold text-lg">
-                  ${product.price.toFixed(2)}
+                  ${Number(product.price).toFixed(2)}
                 </span>
                 <div className="flex">{renderStars(product.rating)}</div>
               </div>
               <div className="flex space-x-2">
-                {product.dietary.includes("gluten-free") && (
+                {product.dietaryLabel.includes("gluten-free") && (
                   <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                     Gluten-free
                   </span>
                 )}
-                {product.dietary.includes("vegan") && (
+                {product.dietaryLabel.includes("vegan") && (
                   <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                     Vegan
                   </span>
