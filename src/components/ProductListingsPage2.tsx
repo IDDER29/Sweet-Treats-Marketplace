@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,76 +19,99 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Star, Search, CakeSlice, Croissant, Candy } from "lucide-react";
+import { Star, Search } from "lucide-react";
 import { getAllProducts } from "@/utils/api";
+import { useRouter } from "next/navigation";
 
-export default function ProductListingsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [priceRange, setPriceRange] = useState([0, 50]);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [dietaryPreferences, setDietaryPreferences] = useState({
-    "gluten-free": false,
-    vegan: false,
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const productsPerPage = 6;
-  const [products, setProducts] = useState([]);
-  console.log("products: ", products);
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string;
+  description: string;
+  dietary: string[];
+  dietaryLabel: string[];
+  rating: number;
+  images: string[];
+}
+
+interface DietaryPreferences {
+  "gluten-free": boolean;
+  vegan: boolean;
+}
+
+const PRODUCTS_PER_PAGE = 6;
+const INITIAL_PRICE_RANGE = [0, 50] as [number, number];
+
+const ProductListingsPage: React.FC = () => {
+  const router = useRouter();
+
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [priceRange, setPriceRange] =
+    useState<[number, number]>(INITIAL_PRICE_RANGE);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [dietaryPreferences, setDietaryPreferences] =
+    useState<DietaryPreferences>({
+      "gluten-free": false,
+      vegan: false,
+    });
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [products, setProducts] = useState<Product[]>([]);
+
   useEffect(() => {
     const fetchProducts = async () => {
-      const response = await getAllProducts();
-      console.log("hi hi hi : ", response);
-      if (response) {
+      try {
+        const response = await getAllProducts();
         setProducts(response);
-      } else {
-        console.error("Error fetching products:", response.message);
+      } catch (error) {
+        console.error("Error fetching products:", error);
       }
     };
-    console.log(products);
     fetchProducts();
   }, []);
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      product.price >= priceRange[0] &&
-      product.price <= priceRange[1] &&
-      (selectedCategory === "All" || product.category === selectedCategory) &&
-      ((!dietaryPreferences["gluten-free"] && !dietaryPreferences["vegan"]) ||
-        (dietaryPreferences["gluten-free"] &&
-          product.dietary.includes("gluten-free")) ||
-        (dietaryPreferences["vegan"] && product.dietary.includes("vegan")))
-  );
 
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesPriceRange =
+      product.price >= priceRange[0] && product.price <= priceRange[1];
+    const matchesCategory =
+      selectedCategory === "All" || product.category === selectedCategory;
+    const matchesDietary =
+      (!dietaryPreferences["gluten-free"] && !dietaryPreferences["vegan"]) ||
+      (dietaryPreferences["gluten-free"] &&
+        product.dietary.includes("gluten-free")) ||
+      (dietaryPreferences["vegan"] && product.dietary.includes("vegan"));
+
+    return (
+      matchesSearch && matchesPriceRange && matchesCategory && matchesDietary
+    );
+  });
+
+  const indexOfLastProduct = currentPage * PRODUCTS_PER_PAGE;
+  const indexOfFirstProduct = indexOfLastProduct - PRODUCTS_PER_PAGE;
   const currentProducts = filteredProducts.slice(
     indexOfFirstProduct,
     indexOfLastProduct
   );
 
-  const pageNumbers = [];
-  for (
-    let i = 1;
-    i <= Math.ceil(filteredProducts.length / productsPerPage);
-    i++
-  ) {
-    pageNumbers.push(i);
-  }
+  const pageNumbers = Array.from(
+    { length: Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE) },
+    (_, i) => i + 1
+  );
 
-  const renderStars = (rating) => {
-    return Array(5)
-      .fill(0)
-      .map((_, i) => (
-        <Star
-          key={i}
-          className={`w-4 h-4 ${
-            i < Math.floor(rating)
-              ? "text-yellow-400 fill-yellow-400"
-              : "text-gray-300"
-          }`}
-        />
-      ));
-  };
+  const renderStars = (rating: number) =>
+    Array.from({ length: 5 }, (_, i) => (
+      <Star
+        key={i}
+        className={`w-4 h-4 ${
+          i < Math.floor(rating)
+            ? "text-yellow-400 fill-yellow-400"
+            : "text-gray-300"
+        }`}
+      />
+    ));
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -140,7 +164,7 @@ export default function ProductListingsPage() {
                 onCheckedChange={(checked) =>
                   setDietaryPreferences((prev) => ({
                     ...prev,
-                    "gluten-free": checked,
+                    "gluten-free": !!checked,
                   }))
                 }
               />
@@ -148,9 +172,12 @@ export default function ProductListingsPage() {
             </label>
             <label className="flex items-center space-x-2">
               <Checkbox
-                checked={dietaryPreferences["vegan"]}
+                checked={dietaryPreferences.vegan}
                 onCheckedChange={(checked) =>
-                  setDietaryPreferences((prev) => ({ ...prev, vegan: checked }))
+                  setDietaryPreferences((prev) => ({
+                    ...prev,
+                    vegan: !!checked,
+                  }))
                 }
               />
               <span>Vegan</span>
@@ -164,11 +191,12 @@ export default function ProductListingsPage() {
         {products.map((product) => (
           <Card
             key={product.id}
-            className="overflow-hidden transition-shadow hover:shadow-lg"
+            className="overflow-hidden transition-shadow hover:shadow-lg hover:cursor-pointer"
+            onClick={() => router.push(`/product/${product.id}`)}
           >
             <CardHeader className="p-0">
               <img
-                src={product.image}
+                src={product.images[0].url}
                 alt={product.name}
                 className="w-full h-48 object-cover"
               />
@@ -218,4 +246,6 @@ export default function ProductListingsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default ProductListingsPage;
