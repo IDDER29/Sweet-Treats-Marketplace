@@ -30,6 +30,7 @@ function SelectField({
         id={id}
         value={value} // Controlled value
         onValueChange={onChange} // Handle selection change
+        required
       >
         <SelectTrigger>
           <SelectValue placeholder={`Select ${label}`} />
