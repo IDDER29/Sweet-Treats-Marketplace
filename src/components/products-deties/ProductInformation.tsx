@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import { Star, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import SelectField from "../reusable-component/SelectField";
 
 interface InfoData {
   name: string;
@@ -76,7 +70,7 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
 
       {/* Price */}
       <p className="text-2xl font-bold text-primary mb-4">
-        ${productInfoData.price.toFixed(2)}
+        ${Number(productInfoData.price).toFixed(2)}
       </p>
 
       {/* Description */}
@@ -118,21 +112,12 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
       {/* Size Selection */}
       {productInfoData.options && productInfoData.options.length > 0 && (
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Size
-          </label>
-          <Select value={selectedSize} onValueChange={setSelectedSize}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select size" />
-            </SelectTrigger>
-            <SelectContent>
-              {productInfoData.options.map((size) => (
-                <SelectItem key={size} value={size}>
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SelectField
+            label={"Size"}
+            options={productInfoData.options}
+            onChange={setSelectedSize}
+            value={selectedSize}
+          />
         </div>
       )}
 

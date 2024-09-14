@@ -145,15 +145,13 @@ export const createNewProduct = async (productData: any) => {
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
-
     const response = await axios.post(`${apiUrl}/products`, productData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
       },
     });
-
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error submitting product:", error);
     throw error;

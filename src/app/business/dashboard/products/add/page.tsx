@@ -50,6 +50,7 @@ export default function ProductDataEntryPage() {
   const [productVariations, setProductVariations] = useState("");
   const [productCustomization, setProductCustomization] = useState("");
   const [seasonalAvailability, setSeasonalAvailability] = useState("");
+  const [availabilityStatus, setAvailabilityStatus] = useState("Available");
   const [images, dispatch] = useReducer(imageReducer, []);
 
   const handleAddImages = (newImages: ImageObject[]) => {
@@ -83,6 +84,7 @@ export default function ProductDataEntryPage() {
       servingSuggestions: productServing, // Add this to your form
       variations: productVariations, // Add this to your form
       customizationOptions: productCustomization, // Add this to your form
+      availability: availabilityStatus,
       images: images.map((img) => img.url), // If you're storing image URLs in the `images` state
     };
 
@@ -285,6 +287,17 @@ export default function ProductDataEntryPage() {
                 options={["Year-round", "Seasonal"]}
                 value={seasonalAvailability}
                 onChange={(value) => setSeasonalAvailability(value)} // Directly use value
+              />
+            </Section>
+
+            {/* Section: Seasonal Availability */}
+            <Section title="Availability Status">
+              <SelectField
+                id="availability"
+                label="Availability Status"
+                options={["Available", "Out of Stock"]}
+                value={availabilityStatus}
+                onChange={(value) => setAvailabilityStatus(value)} // Directly use value
               />
             </Section>
             {/* Section: Product Images */}
