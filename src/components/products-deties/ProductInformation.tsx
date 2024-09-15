@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Star, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SelectField from "../reusable-component/SelectField";
@@ -31,13 +31,37 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, prev + amount));
   };
+  const [cart, setCart] = useState<any[]>([]);
 
+  useEffect(() => {
+    // Check if there's a saved cart in localStorage when the component mounts
+    const savedCart = localStorage.getItem("cart");
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
+  }, []);
   const handleAddToCart = () => {
-    // Add your add-to-cart logic here
-    console.log("Add to Cart:", {
+    const cartItem = {
       size: selectedSize,
       quantity,
-    });
+    };
+
+    if (false) {
+      console.log("Add to Cart (Logged In):", cartItem);
+      // Logic to add the item to the cart for logged-in users
+    } else {
+      console.log("Add to Cart (Unregistered):", cartItem);
+
+      let updatedCart = [...cart, cartItem];
+      setCart(updatedCart);
+
+      // Save the updated cart in localStorage
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      alert(
+        "Item added to the cart! You can continue shopping or proceed to checkout later."
+      );
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -100,7 +124,7 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
         <h3 className="font-semibold mb-2">Availability:</h3>
         <p
           className={`text-sm ${
-            productInfoData.availability === "In Stock"
+            productInfoData.availability !== "Out of Stock"
               ? "text-green-600"
               : "text-red-600"
           }`}
@@ -142,7 +166,7 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
       {/* Add to Cart Button */}
       <Button
         onClick={handleAddToCart}
-        disabled={productInfoData.availability !== "In Stock"}
+        disabled={productInfoData.availability == "Out of Stock"}
         className="w-full"
       >
         Add to Cart

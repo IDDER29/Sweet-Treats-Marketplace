@@ -165,15 +165,25 @@ export const businessesLogIn = async (
 // Function to send product data to the server
 // Function to send product data to the server
 export const createNewProduct = async (productData: any) => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
   try {
+    const session = await auth(); // Get the session from NextAuth
+    const sessionReq = JSON.stringify(session);
+
+    // Ensure that session.user exists and contains the user ID
+    if (!session?.user?.id) {
+      throw new Error("User is not authenticated");
+    }
     const newProduct = JSON.stringify(productData);
     // Use axiosInstance which already has the base URL and token in the interceptor
-    console.log("productData", newProduct);
-    const response = await axios.post(
-      "http://localhost:8000/products",
-      productData
-    );
-    console.log("response", response);
+    console.log("response", newProduct);
+    const response = await axios.post(`${apiUrl}/products`, productData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+      },
+    });
+
     return response.data;
   } catch (error) {
     console.error("Error submitting product:", error.message);

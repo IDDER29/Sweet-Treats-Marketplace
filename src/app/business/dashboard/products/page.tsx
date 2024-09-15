@@ -10,7 +10,7 @@ export default async function ProductsPage() {
   const businessProducts = await getBusinessesProducts(); // Fetch products on server side
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex overflow-hidden">
       <DashboardSidbar />
       <main className="container mx-auto px-4 py-8">
         <HeaderSection />

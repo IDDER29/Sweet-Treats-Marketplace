@@ -50,7 +50,7 @@ export default function ProductDataEntryPage() {
   const [productVariations, setProductVariations] = useState("");
   const [productCustomization, setProductCustomization] = useState("");
   const [seasonalAvailability, setSeasonalAvailability] = useState("");
-  const [availabilityStatus, setAvailabilityStatus] = useState("Available");
+  const [availabilityStatus, setAvailabilityStatus] = useState("In Stock");
   const [images, dispatch] = useReducer(imageReducer, []);
 
   const handleAddImages = (newImages: ImageObject[]) => {
@@ -84,6 +84,7 @@ export default function ProductDataEntryPage() {
       servingSuggestions: productServing, // Add this to your form
       variations: productVariations, // Add this to your form
       customizationOptions: productCustomization, // Add this to your form
+      availability: availabilityStatus,
       images: images.map((img) => img),
     };
 
@@ -143,9 +144,10 @@ export default function ProductDataEntryPage() {
               />
               <TextareaField
                 id="product-description"
-                label="Product Description"
+                label="Product Description *"
                 placeholder="E.g., Soft, chewy cookies with rich chocolate chips."
                 value={productDescription}
+                required
                 onChange={(e) => setProductDescription(e.target.value)}
                 tooltip={
                   <Tooltip message="Provide details about the product's texture, taste, and characteristics." />
@@ -161,6 +163,7 @@ export default function ProductDataEntryPage() {
                 placeholder="E.g., Flour, Sugar, Butter, Chocolate Chips"
                 value={productIngredients}
                 onChange={(e) => setProductIngredients(e.target.value)}
+                required
                 tooltip={
                   <Tooltip message="List all ingredients, highlighting allergens." />
                 }
@@ -177,9 +180,10 @@ export default function ProductDataEntryPage() {
               />
               <SelectField
                 id="dietary-label"
-                label="Dietary Labels"
+                label="Dietary Labels *"
                 options={["None", "Gluten-Free", "Vegan", "Sugar-Free"]}
                 value={dietaryLabel}
+                required
                 onChange={(value) => setDietaryLabel(value)} // Directly use value
               />
             </Section>
@@ -294,7 +298,7 @@ export default function ProductDataEntryPage() {
               <SelectField
                 id="availability"
                 label="Availability Status"
-                options={["Available", "Out of Stock"]}
+                options={["In Stock", "Out of Stock", "Limited"]}
                 value={availabilityStatus}
                 onChange={(value) => setAvailabilityStatus(value)} // Directly use value
               />

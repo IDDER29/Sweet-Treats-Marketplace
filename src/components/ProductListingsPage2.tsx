@@ -22,6 +22,7 @@ import {
 import { Star, Search } from "lucide-react";
 import { getAllProducts } from "@/utils/api";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -192,13 +193,15 @@ const ProductListingsPage: React.FC = () => {
           <Card
             key={product.id}
             className="overflow-hidden transition-shadow hover:shadow-lg hover:cursor-pointer"
-            onClick={() => router.push(`/product/${product.id}`)}
+            onClick={() => router.push(`/product?id=${product.id}`)}
           >
             <CardHeader className="p-0">
-              <img
+              <Image
                 src={product.images[0].url}
                 alt={product.name}
                 className="w-full h-48 object-cover"
+                width={500}
+                height={500}
               />
             </CardHeader>
             <CardContent className="p-4">
