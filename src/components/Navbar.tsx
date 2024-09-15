@@ -1,5 +1,3 @@
-"use client";
-import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ShoppingCartIcon, UserIcon } from "lucide-react";
 import {
@@ -15,23 +13,10 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/auth";
 import { doLogout } from "@/app/actions";
 import { User, Settings, LogOut } from "lucide-react";
+import ShopingIcon from "./ShopingIcon";
 
-const Navbar = () => {
-  //  const session = await auth();
-  const [cartCount, setCartCount] = useState<number>(0);
-
-  useEffect(() => {
-    // Get the cart from localStorage and calculate the total number of items
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      const cartItems = JSON.parse(savedCart);
-      const totalItems = cartItems.reduce(
-        (acc: number, item: any) => acc + item.quantity,
-        0
-      );
-      setCartCount(totalItems);
-    }
-  }, []);
+const Navbar = async () => {
+  const session = await auth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -45,17 +30,9 @@ const Navbar = () => {
           <Link href="/about">About Us</Link>
           <Link href="/contact">Contact</Link>
 
-          <Link href="/cart" className="relative">
-            <ShoppingCartIcon className="h-5 w-5" />
-            {/* Display the cart count as a badge */}
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full text-xs px-1.5 py-0.5">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+          <ShopingIcon />
 
-          {/* session?.user ? (
+          {session?.user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -106,11 +83,7 @@ const Navbar = () => {
             <Link href="/login">
               <UserIcon className="h-5 w-5" />
             </Link>
-          )*/}
-
-          <Link href="/login">
-            <UserIcon className="h-5 w-5" />
-          </Link>
+          )}
         </nav>
       </div>
     </header>
