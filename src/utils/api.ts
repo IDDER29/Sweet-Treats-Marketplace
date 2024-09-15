@@ -1,8 +1,7 @@
 "use server";
 // utils/api.ts
 import axios, { AxiosResponse } from "axios";
-import axiosInstance from "@/lib/axios";
-import { auth } from "@/auth";
+import { auth } from "@/auth"; // Ensure you have the auth function to get session
 
 interface BusinessRegistrationData {
   firstName: string;
@@ -22,6 +21,35 @@ interface ApiResponse {
   data?: any;
 }
 
+// Create axios instance
+const axiosInstance = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "", // Use environment variable
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Add interceptor to include session token in every request
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    try {
+      const session = await auth(); // Get the session from NextAuth
+
+      if (session?.user?.id) {
+        // Check if the session and user id exist
+        config.headers.Authorization = `Bearer ${session.user.id}`; // Set Bearer token
+      }
+
+      return config;
+    } catch (error) {
+      console.error("Error in request interceptor:", error);
+      return Promise.reject(error);
+    }
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 export const registerBusiness = async (
   data: BusinessRegistrationData
 ): Promise<ApiResponse> => {
@@ -135,25 +163,20 @@ export const businessesLogIn = async (
 };
 
 // Function to send product data to the server
+// Function to send product data to the server
 export const createNewProduct = async (productData: any) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
-    if (!session?.user?.id) {
-      throw new Error("User is not authenticated");
-    }
-    const response = await axios.post(`${apiUrl}/products`, productData, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
-      },
-    });
-    return response;
+    const newProduct = JSON.stringify(productData);
+    // Use axiosInstance which already has the base URL and token in the interceptor
+    console.log("productData", newProduct);
+    const response = await axios.post(
+      "http://localhost:8000/products",
+      productData
+    );
+    console.log("response", response);
+    return response.data;
   } catch (error) {
-    console.error("Error submitting product:", error);
+    console.error("Error submitting product:", error.message);
     throw error;
   }
 };

@@ -10,7 +10,7 @@ const ProductTableRow = ({ product }: { product: any }) => {
     <TableRow key={product.id} id={product.id}>
       <TableCell>
         <Image
-          src={product.images[0].url}
+          src={product.images[0]?.url}
           alt={product.name}
           width={100}
           height={100}

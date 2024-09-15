@@ -212,18 +212,6 @@ const ProductListingsPage: React.FC = () => {
                 </span>
                 <div className="flex">{renderStars(product.rating)}</div>
               </div>
-              <div className="flex space-x-2">
-                {product.dietaryLabel.includes("gluten-free") && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                    Gluten-free
-                  </span>
-                )}
-                {product.dietaryLabel.includes("vegan") && (
-                  <span className="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                    Vegan
-                  </span>
-                )}
-              </div>
             </CardContent>
             <CardFooter>
               <Button className="w-full">Add to Cart</Button>

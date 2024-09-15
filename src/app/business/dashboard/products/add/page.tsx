@@ -84,8 +84,7 @@ export default function ProductDataEntryPage() {
       servingSuggestions: productServing, // Add this to your form
       variations: productVariations, // Add this to your form
       customizationOptions: productCustomization, // Add this to your form
-      availability: availabilityStatus,
-      images: images.map((img) => img.url), // If you're storing image URLs in the `images` state
+      images: images.map((img) => img),
     };
 
     try {
