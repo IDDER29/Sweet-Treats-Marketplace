@@ -133,6 +133,7 @@ export default function ProductDetailsPage() {
         {/* Product Information */}
         <ProductInformation
           productInfoData={{
+            id: productId,
             name,
             rating,
             reviewCount,

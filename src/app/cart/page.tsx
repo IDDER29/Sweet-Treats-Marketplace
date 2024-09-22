@@ -57,7 +57,6 @@ export default function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <CartSidePanel isOpen={true} onClose={false} />
       <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

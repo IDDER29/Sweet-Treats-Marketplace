@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+"use client";
+import React, { useState } from "react";
 import { Star, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SelectField from "../reusable-component/SelectField";
+import { useCart } from "@/context/CartContext";
 
 interface InfoData {
+  id: string;
   name: string;
   rating: number;
   reviewCount: number;
@@ -28,40 +31,30 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
   );
   const [quantity, setQuantity] = useState<number>(1);
 
+  // Use the cart context
+  const { addToCart } = useCart();
+
+  // Handle quantity change
   const handleQuantityChange = (amount: number) => {
     setQuantity((prev) => Math.max(1, prev + amount));
   };
-  const [cart, setCart] = useState<any[]>([]);
 
-  useEffect(() => {
-    // Check if there's a saved cart in localStorage when the component mounts
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
+  // Handle adding to cart
   const handleAddToCart = () => {
     const cartItem = {
-      size: selectedSize,
+      id: productInfoData.id,
+      name: productInfoData.name,
+      price: productInfoData.price,
       quantity,
+      size: selectedSize,
     };
 
-    if (false) {
-      console.log("Add to Cart (Logged In):", cartItem);
-      // Logic to add the item to the cart for logged-in users
-    } else {
-      console.log("Add to Cart (Unregistered):", cartItem);
+    // Add the item to the cart
+    addToCart(cartItem);
 
-      let updatedCart = [...cart, cartItem];
-      setCart(updatedCart);
-
-      // Save the updated cart in localStorage
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-      alert(
-        "Item added to the cart! You can continue shopping or proceed to checkout later."
-      );
-    }
+    alert(
+      "Item added to the cart! You can continue shopping or proceed to checkout later."
+    );
   };
 
   const renderStars = (rating: number) => {
