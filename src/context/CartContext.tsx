@@ -4,10 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 // Define initial cart context types
 interface CartItem {
   id: string;
-  name: string;
-  price: number;
   quantity: number;
-  size?: string;
 }
 
 interface CartContextType {
@@ -50,26 +47,25 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       // Check if the item already exists in the cart
       const existingItem = prevCart.find((item) => item.id === itemToAdd.id);
 
+      let updatedCart;
+
       if (existingItem) {
         // Update the quantity of the existing item
-        return prevCart.map((item) =>
+        updatedCart = prevCart.map((item) =>
           item.id === itemToAdd.id
             ? { ...item, quantity: item.quantity + itemToAdd.quantity }
             : item
         );
       } else {
         // Add new item to cart if it doesn't exist
-        return [...prevCart, itemToAdd];
+        updatedCart = [...prevCart, itemToAdd];
       }
-    });
 
-    // Persist the updated cart to localStorage
-    const updatedCart = cart.map((item) =>
-      item.id === itemToAdd.id
-        ? { ...item, quantity: item.quantity + itemToAdd.quantity }
-        : item
-    );
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+      // Persist the updated cart to localStorage inside the setCart function
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      return updatedCart; // Return the updated cart
+    });
   };
 
   // Remove an item from the cart

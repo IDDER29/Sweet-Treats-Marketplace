@@ -43,10 +43,7 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
   const handleAddToCart = () => {
     const cartItem = {
       id: productInfoData.id,
-      name: productInfoData.name,
-      price: productInfoData.price,
       quantity,
-      size: selectedSize,
     };
 
     // Add the item to the cart
