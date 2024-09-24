@@ -10,6 +10,7 @@ import { useCart } from "@/context/CartContext"; // Import your CartContext
 import { getProductById } from "@/utils/api"; // Your API fetch utility
 import { toast } from "react-toastify";
 import Image from "next/image";
+import AuthModals from "./AuthModals";
 
 interface ProductDetails {
   id: string;
@@ -168,7 +169,7 @@ export default function CartSidePanel() {
             </span>
           </div>
           <Separator className="my-4" />
-          <Button className="w-full">
+          <Button className="w-full" onClick={() => {}}>
             <ShoppingCart className="mr-2 h-4 w-4" /> Proceed to Checkout
           </Button>
         </div>
