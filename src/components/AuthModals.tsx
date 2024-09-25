@@ -1,5 +1,5 @@
 import { EnhancedAuthFlow } from "./EnhanceAuthFlow";
-import { AuthFlow } from "./AuthFlow";
+import { AuthFlow } from "./AuthFlow2";
 
 export default function AuthModals() {
   return (

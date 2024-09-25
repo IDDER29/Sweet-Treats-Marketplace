@@ -1,11 +1,23 @@
+// AuthSteps/SocialMediaAuth.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-const SocialMediaAuth = ({ googleAuth, facebookAuth }) => {
+interface SocialMediaAuthProps {
+  googleAuth: () => void;
+  facebookAuth: () => void;
+}
+
+const SocialMediaAuth: React.FC<SocialMediaAuthProps> = ({
+  googleAuth,
+  facebookAuth,
+}) => {
   return (
     <>
-      {" "}
-      <Button variant="outline" className="w-full" onClick={googleAuth}>
+      <Button
+        variant="outline"
+        className="w-full flex items-center justify-center"
+        onClick={googleAuth}
+      >
         <svg
           className="mr-2 h-4 w-4"
           aria-hidden="true"
@@ -23,7 +35,11 @@ const SocialMediaAuth = ({ googleAuth, facebookAuth }) => {
         </svg>
         Google
       </Button>
-      <Button variant="outline" className="w-full" onClick={facebookAuth}>
+      <Button
+        variant="outline"
+        className="w-full flex items-center justify-center"
+        onClick={facebookAuth}
+      >
         <svg
           className="mr-2 h-4 w-4"
           aria-hidden="true"
