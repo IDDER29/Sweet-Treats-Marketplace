@@ -211,7 +211,7 @@ const ProductListingsPage: React.FC = () => {
               </p>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-bold text-lg">
-                  ${Number(product.price).toFixed(2)}
+                  DH {Number(product.price).toFixed(2)}
                 </span>
                 <div className="flex">{renderStars(product.rating)}</div>
               </div>

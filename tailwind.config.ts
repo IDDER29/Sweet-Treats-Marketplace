@@ -21,44 +21,44 @@ const config = {
     },
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "#F4A261", // Soft orange for accents
+        input: "#F8F4F4", // Light cream for input backgrounds
+        ring: "#F7C59F", // Warm beige for active elements
+        background: "#FFF5E1", // Light pastel cream for overall background
+        foreground: "#5E503F", // Deep brown for text and contrasts
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#E07A5F", // Soft coral for primary buttons and actions
+          foreground: "#FFF4E3", // Creamy white for text on primary elements
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#81B29A", // Sage green for secondary elements
+          foreground: "#FFF4E3", // Creamy white for text on secondary elements
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#F4A261", // Warm orange for warnings
+          foreground: "#FFF4E3", // Creamy white for text on destructive elements
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#F2CC8F", // Light yellow for muted elements
+          foreground: "#5E503F", // Deep brown for muted text
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#E9C46A", // Honey yellow for accent elements
+          foreground: "#5E503F", // Deep brown for text on accent elements
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#FFF4E3", // Creamy background for popovers
+          foreground: "#5E503F", // Deep brown for popover text
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#FFF1DB", // Soft pastel peach for cards
+          foreground: "#5E503F", // Deep brown for card text
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "16px", // Larger rounded corners for a softer feel
+        md: "12px", // Medium rounded corners
+        sm: "8px", // Smaller rounded corners for compact elements
       },
       keyframes: {
         "accordion-down": {
