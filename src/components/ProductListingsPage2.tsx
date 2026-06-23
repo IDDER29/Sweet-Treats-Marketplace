@@ -22,7 +22,9 @@ import {
 import { Star, Search } from "lucide-react";
 import { getAllProducts } from "@/utils/api";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { useCart } from "@/context/CartContext";
+import { formatCurrency } from "@/lib/currency";
+import { toast } from "react-toastify";
 
 interface ProductImage {
   url: string;
@@ -50,6 +52,7 @@ const INITIAL_PRICE_RANGE = [0, 50] as [number, number];
 
 const ProductListingsPage: React.FC = () => {
   const router = useRouter();
+  const { addToCart } = useCart();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [priceRange, setPriceRange] =
@@ -74,6 +77,12 @@ const ProductListingsPage: React.FC = () => {
     };
     fetchProducts();
   }, []);
+
+  // Reset to the first page whenever filters change so you can't get stuck
+  // on a now-empty page.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory, priceRange, dietaryPreferences]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -193,15 +202,16 @@ const ProductListingsPage: React.FC = () => {
 
       {/* Product Display Area */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {products.map((product) => (
+        {currentProducts.map((product) => (
           <Card
             key={product.id}
             className="overflow-hidden transition-shadow hover:shadow-lg hover:cursor-pointer"
-            onClick={() => router.push(`/product?id=${product.id}`)}
+            onClick={() => router.push(`/product/${product.id}`)}
           >
             <CardHeader className="p-0">
-              <Image
-                src={product.images[0].url}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={product.images?.[0]?.url || "/placeholder.svg"}
                 alt={product.name}
                 className="w-full h-48 object-cover"
                 width={500}
@@ -215,13 +225,28 @@ const ProductListingsPage: React.FC = () => {
               </p>
               <div className="flex justify-between items-center mb-2">
                 <span className="font-bold text-lg">
-                  ${Number(product.price).toFixed(2)}
+                  {formatCurrency(Number(product.price))}
                 </span>
                 <div className="flex">{renderStars(product.rating)}</div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button className="w-full">Add to Cart</Button>
+              <Button
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addToCart({
+                    id: product.id,
+                    quantity: 1,
+                    name: product.name,
+                    price: Number(product.price),
+                    image: product.images?.[0]?.url,
+                  });
+                  toast.success("Added to cart.");
+                }}
+              >
+                Add to Cart
+              </Button>
             </CardFooter>
           </Card>
         ))}

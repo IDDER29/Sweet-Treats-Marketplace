@@ -13,8 +13,10 @@ import Link from "next/link";
 export default function BusinessSignIn() {
   const router = useRouter();
   const [error, setError] = useState("");
-  async function handleFormSubmit(event: any) {
+  const [loading, setLoading] = useState(false);
+  async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setLoading(true);
     try {
       setError("");
       const formData = new FormData(event.currentTarget);
@@ -26,6 +28,8 @@ export default function BusinessSignIn() {
       }
     } catch (error) {
       setError("Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   }
   return (
@@ -81,12 +85,12 @@ export default function BusinessSignIn() {
             </div>
 
             <div className="text-sm">
-              <a
-                href="#"
+              <Link
+                href="/auth/forgot-password"
                 className="font-medium text-primary hover:text-primary/80"
               >
                 Forgot your password?
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -96,8 +100,9 @@ export default function BusinessSignIn() {
               name="action"
               value="logIn"
               className="w-full"
+              disabled={loading}
             >
-              Sign in
+              {loading ? "Signing in…" : "Sign in"}
             </Button>
           </div>
         </form>

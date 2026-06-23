@@ -4,6 +4,8 @@ import { Star, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SelectField from "../reusable-component/SelectField";
 import { useCart } from "@/context/CartContext";
+import { formatCurrency } from "@/lib/currency";
+import { toast } from "react-toastify";
 
 interface InfoData {
   id: string;
@@ -41,17 +43,13 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
 
   // Handle adding to cart
   const handleAddToCart = () => {
-    const cartItem = {
+    addToCart({
       id: productInfoData.id,
       quantity,
-    };
-
-    // Add the item to the cart
-    addToCart(cartItem);
-
-    alert(
-      "Item added to the cart! You can continue shopping or proceed to checkout later."
-    );
+      name: productInfoData.name,
+      price: Number(productInfoData.price),
+    });
+    toast.success("Added to cart.");
   };
 
   const renderStars = (rating: number) => {
@@ -84,7 +82,7 @@ const ProductInformation: React.FC<ProductInformationProps> = ({
 
       {/* Price */}
       <p className="text-2xl font-bold text-primary mb-4">
-        ${Number(productInfoData.price).toFixed(2)}
+        {formatCurrency(Number(productInfoData.price))}
       </p>
 
       {/* Description */}

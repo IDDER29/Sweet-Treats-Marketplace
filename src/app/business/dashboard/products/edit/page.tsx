@@ -10,7 +10,13 @@ import InputField from "@/components/reusable-component/InputField";
 import TextareaField from "@/components/reusable-component/TextareaField";
 import SelectField from "@/components/reusable-component/SelectField";
 import Tooltip from "@/components/reusable-component/Tooltip"; // Tooltip component
+import { LoadingState } from "@/components/feedback/LoadingState";
 import { getProductById, updateProduct } from "@/utils/api";
+import {
+  PRODUCT_CATEGORIES,
+  DIETARY_LABELS,
+  AVAILABILITY_OPTIONS,
+} from "@/config";
 import { useRouter, useSearchParams } from "next/navigation"; // Correct usage of useRouter from Next.js 13
 
 interface ImageObject {
@@ -55,6 +61,7 @@ export default function EditProductPage() {
   const [productVariations, setProductVariations] = useState("");
   const [productCustomization, setProductCustomization] = useState("");
   const [seasonalAvailability, setSeasonalAvailability] = useState("");
+  const [availabilityStatus, setAvailabilityStatus] = useState("In Stock");
   const [images, dispatch] = useReducer(imageReducer, []);
   const [loading, setLoading] = useState(true);
 
@@ -88,6 +95,9 @@ export default function EditProductPage() {
         setProductVariations(product.variations);
         setProductCustomization(product.customizationOptions);
         setSeasonalAvailability(product.seasonalAvailability);
+        if (product.availability) {
+          setAvailabilityStatus(product.availability);
+        }
 
         // Replace images with the fetched product's images
         dispatch({
@@ -136,6 +146,7 @@ export default function EditProductPage() {
       variations: productVariations,
       customizationOptions: productCustomization,
       seasonalAvailability: seasonalAvailability,
+      availability: availabilityStatus,
       images: images.map((img) => img),
     };
 
@@ -149,7 +160,11 @@ export default function EditProductPage() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState rows={6} />
+      </div>
+    );
   } else {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -197,7 +212,7 @@ export default function EditProductPage() {
                 <SelectField
                   id="product-category"
                   label="Category *"
-                  options={["Bread", "Pastry", "Cake", "Cookie"]}
+                  options={[...PRODUCT_CATEGORIES]}
                   value={productCategory}
                   onChange={(value) => setProductCategory(value)} // Directly use value
                   required
@@ -245,7 +260,7 @@ export default function EditProductPage() {
                 <SelectField
                   id="dietary-label"
                   label="Dietary Labels"
-                  options={["None", "Gluten-Free", "Vegan", "Sugar-Free"]}
+                  options={[...DIETARY_LABELS]}
                   value={dietaryLabel}
                   onChange={(value) => setDietaryLabel(value)} // Directly use value
                 />
@@ -371,6 +386,17 @@ export default function EditProductPage() {
                   options={["Year-round", "Seasonal"]}
                   value={seasonalAvailability}
                   onChange={(value) => setSeasonalAvailability(value)} // Directly use value
+                />
+              </Section>
+
+              {/* Section: Availability Status */}
+              <Section title="Availability Status">
+                <SelectField
+                  id="availability"
+                  label="Availability Status"
+                  options={[...AVAILABILITY_OPTIONS]}
+                  value={availabilityStatus}
+                  onChange={(value) => setAvailabilityStatus(value)} // Directly use value
                 />
               </Section>
               {/* Section: Product Images */}

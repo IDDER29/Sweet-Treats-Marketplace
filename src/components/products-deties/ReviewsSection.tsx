@@ -1,4 +1,6 @@
+"use client";
 import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -11,50 +13,52 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import { toast } from "react-toastify";
-
-interface Review {
-  rating: number;
-  comment: string;
-}
-
-interface ProductReview {
-  name: string;
-  rating: number;
-  comment: string;
-}
+import { getProductReviews, createReview } from "@/services/reviews";
+import { LoadingState } from "@/components/feedback/LoadingState";
 
 interface ProductReviewsProps {
-  productReviewsData: ProductReview[];
+  productId?: string;
 }
 
-const ReviewsSection: React.FC<ProductReviewsProps> = ({
-  productReviewsData,
-}) => {
-  const [newReview, setNewReview] = useState<Review>({
-    rating: 5,
-    comment: "",
+const ReviewsSection: React.FC<ProductReviewsProps> = ({ productId }) => {
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+
+  const { data: reviews = [], isLoading } = useQuery({
+    queryKey: ["reviews", productId],
+    queryFn: () => getProductReviews(productId as string),
+    enabled: !!productId,
   });
 
-  const handleRatingClick = (rating: number) => {
-    console.log(rating);
-    setNewReview((prev) => ({ ...prev, rating }));
-  };
+  const mutation = useMutation({
+    mutationFn: () =>
+      createReview({
+        productId: productId as string,
+        rating: newReview.rating,
+        comment: newReview.comment,
+      }),
+    onSuccess: () => {
+      toast.success("Review submitted successfully.");
+      setNewReview({ rating: 5, comment: "" });
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["reviews", productId] });
+    },
+    onError: () =>
+      toast.error("Could not submit your review. Please try again."),
+  });
 
   const handleSubmitReview = () => {
-    console.log("adfsdf");
     if (newReview.comment.trim().length < 10) {
       toast.error("Review comment must be at least 10 characters long.");
       return;
     }
-
-    console.log("Submitted review:", newReview);
-    // Implement the actual review submission logic here
-    setNewReview({ rating: 5, comment: "" });
-    toast.success("Review submitted successfully.");
+    if (!productId) return;
+    mutation.mutate();
   };
 
-  const renderStars = (rating: number) => {
-    return Array(5)
+  const renderStars = (rating: number) =>
+    Array(5)
       .fill(null)
       .map((_, i) => (
         <Star
@@ -64,20 +68,21 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({
           }`}
         />
       ));
-  };
 
   return (
     <div className="mt-8">
       <h2 className="text-xl font-bold mb-4">Customer Reviews</h2>
 
-      {productReviewsData.length > 0 ? (
+      {isLoading ? (
+        <LoadingState rows={2} />
+      ) : reviews.length > 0 ? (
         <ul className="space-y-4">
-          {productReviewsData.map((review, index) => (
-            <li key={index} className="border p-4 rounded-lg">
+          {reviews.map((review, index) => (
+            <li key={review.id ?? index} className="border p-4 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <div className="flex">{renderStars(review.rating)}</div>
                 <span className="text-sm text-gray-600">
-                  {review.rating} stars
+                  {review.author ?? review.name ?? "Anonymous"}
                 </span>
               </div>
               <p className="text-sm text-gray-700">{review.comment}</p>
@@ -89,7 +94,7 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({
       )}
 
       {/* Submit Review Dialog */}
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="mt-4">Write a Review</Button>
         </DialogTrigger>
@@ -101,7 +106,6 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4">
-            {/* Rating Input */}
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Rating
             </label>
@@ -110,18 +114,20 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({
                 .fill(null)
                 .map((_, i) => (
                   <button
+                    type="button"
                     key={i}
                     className={`p-1 ${
                       newReview.rating > i ? "text-yellow-400" : "text-gray-300"
                     }`}
-                    onClick={() => handleRatingClick(i + 1)}
+                    onClick={() =>
+                      setNewReview((prev) => ({ ...prev, rating: i + 1 }))
+                    }
                   >
                     <Star className="w-6 h-6" />
                   </button>
                 ))}
             </div>
 
-            {/* Comment Input */}
             <label className="block text-sm font-medium text-gray-700 mt-4">
               Comment
             </label>
@@ -137,9 +143,9 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({
             <Button
               onClick={handleSubmitReview}
               className="mt-4"
-              disabled={!newReview.comment.trim()}
+              disabled={!newReview.comment.trim() || mutation.isPending}
             >
-              Submit Review
+              {mutation.isPending ? "Submitting…" : "Submit Review"}
             </Button>
           </div>
         </DialogContent>

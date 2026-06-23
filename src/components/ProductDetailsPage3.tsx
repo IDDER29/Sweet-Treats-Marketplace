@@ -83,9 +83,9 @@ const useProductDetails = (productId: string | null) => {
   };
 };
 
-export default function ProductDetailsPage() {
+export default function ProductDetailsPage({ id }: { id?: string }) {
   const searchParams = useSearchParams();
-  const productId = searchParams.get("id");
+  const productId = id ?? searchParams.get("id");
   const { product, loading, images } = useProductDetails(productId);
   const [name, setName] = useState("");
   const [rating, setRating] = useState(0);
@@ -167,7 +167,7 @@ export default function ProductDetailsPage() {
       </div>
 
       {/* Reviews Section */}
-      <ReviewsSection productReviewsData={[]} />
+      <ReviewsSection productId={productId ?? undefined} />
     </div>
   );
 }

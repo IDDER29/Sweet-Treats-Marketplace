@@ -11,6 +11,11 @@ import TextareaField from "@/components/reusable-component/TextareaField";
 import SelectField from "@/components/reusable-component/SelectField";
 import Tooltip from "@/components/reusable-component/Tooltip"; // Tooltip component
 import { createNewProduct } from "@/utils/api";
+import {
+  PRODUCT_CATEGORIES,
+  DIETARY_LABELS,
+  AVAILABILITY_OPTIONS,
+} from "@/config";
 import { useRouter } from "next/navigation";
 interface ImageObject {
   url: string;
@@ -140,7 +145,7 @@ export default function ProductDataEntryPage() {
               <SelectField
                 id="product-category"
                 label="Category *"
-                options={["Bread", "Pastry", "Cake", "Cookie"]}
+                options={[...PRODUCT_CATEGORIES]}
                 value={productCategory}
                 onChange={(value) => setProductCategory(value)} // Directly use value
                 required
@@ -190,7 +195,7 @@ export default function ProductDataEntryPage() {
               <SelectField
                 id="dietary-label"
                 label="Dietary Labels *"
-                options={["None", "Gluten-Free", "Vegan", "Sugar-Free"]}
+                options={[...DIETARY_LABELS]}
                 value={dietaryLabel}
                 required
                 onChange={(value) => setDietaryLabel(value)} // Directly use value
@@ -325,7 +330,7 @@ export default function ProductDataEntryPage() {
               <SelectField
                 id="availability"
                 label="Availability Status"
-                options={["In Stock", "Out of Stock", "Limited"]}
+                options={[...AVAILABILITY_OPTIONS]}
                 value={availabilityStatus}
                 onChange={(value) => setAvailabilityStatus(value)} // Directly use value
               />

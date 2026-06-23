@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { CreditCard, PlayIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { CreditCard, Banknote, Loader2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,23 +17,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { useCart } from "@/context/CartContext";
+import { formatCurrency } from "@/lib/currency";
+import { createOrder } from "@/services/orders";
+import type { OrderItem } from "@/types";
 
-// Mock data for cart items (you would typically get this from a cart state or API)
-const cartItems = [
-  { id: 1, name: "Chocolate Cake", price: 25.99, quantity: 1 },
-  { id: 2, name: "Strawberry Tart", price: 18.99, quantity: 2 },
-  { id: 3, name: "Macarons Set", price: 15.99, quantity: 1 },
-];
+const DELIVERY_FEE = 5.99;
+const TAX_RATE = 0.1;
 
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { cartState, clearCart } = useCart();
+  const { cart } = cartState;
+
   const [shippingInfo, setShippingInfo] = useState({
     name: "",
     address: "",
+    city: "",
     phone: "",
     instructions: "",
   });
-
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [submitting, setSubmitting] = useState(false);
 
   const handleShippingInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -38,27 +46,71 @@ export default function CheckoutPage() {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Here you would typically send the order data to your backend
-    console.log("Order submitted", { shippingInfo, paymentMethod });
-    // Then redirect to the order confirmation page
-  };
-
-  const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+  const subtotal = cart.reduce(
+    (acc, item) => acc + (item.price ?? 0) * item.quantity,
     0
   );
-  const deliveryFee = 5.99;
-  const tax = subtotal * 0.1; // Assuming 10% tax
+  const deliveryFee = cart.length > 0 ? DELIVERY_FEE : 0;
+  const tax = subtotal * TAX_RATE;
   const total = subtotal + deliveryFee + tax;
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (cart.length === 0) return;
+
+    const items: OrderItem[] = cart.map((i) => ({
+      productId: i.id,
+      name: i.name ?? "Product",
+      price: i.price ?? 0,
+      quantity: i.quantity,
+      image: i.image,
+    }));
+
+    setSubmitting(true);
+    try {
+      const order = await createOrder({
+        items,
+        shippingAddress: {
+          fullName: shippingInfo.name,
+          line1: shippingInfo.address,
+          city: shippingInfo.city,
+          phone: shippingInfo.phone,
+          instructions: shippingInfo.instructions,
+        },
+        paymentMethod,
+      });
+      clearCart();
+      router.push(
+        `/cart/checkout/order-confirmation?orderId=${encodeURIComponent(
+          order.id
+        )}`
+      );
+    } catch {
+      toast.error("We couldn't place your order. Please try again.");
+      setSubmitting(false);
+    }
+  };
+
+  if (cart.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-3xl font-bold mb-4">Checkout</h1>
+        <p className="text-muted-foreground mb-6">
+          Your cart is empty — add something before checking out.
+        </p>
+        <Button asChild>
+          <Link href="/products">Browse products</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          {/* Shipping Information Form */}
+          {/* Shipping Information */}
           <Card>
             <CardHeader>
               <CardTitle>Shipping Information</CardTitle>
@@ -80,6 +132,16 @@ export default function CheckoutPage() {
                   id="address"
                   name="address"
                   value={shippingInfo.address}
+                  onChange={handleShippingInfoChange}
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  name="city"
+                  value={shippingInfo.city}
                   onChange={handleShippingInfoChange}
                   required
                 />
@@ -109,10 +171,12 @@ export default function CheckoutPage() {
             </CardContent>
           </Card>
 
-          {/* Payment Information Section */}
+          {/* Payment method. No raw card fields are collected here — online
+              card payments go through a PCI-compliant provider (Stripe) as a
+              hosted checkout/redirect, which is the documented next step. */}
           <Card>
             <CardHeader>
-              <CardTitle>Payment Information</CardTitle>
+              <CardTitle>Payment Method</CardTitle>
             </CardHeader>
             <CardContent>
               <RadioGroup
@@ -121,48 +185,30 @@ export default function CheckoutPage() {
                 className="space-y-4"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="credit-card" id="credit-card" />
+                  <RadioGroupItem value="cod" id="cod" />
                   <Label
-                    htmlFor="credit-card"
+                    htmlFor="cod"
+                    className="flex items-center space-x-2"
+                  >
+                    <Banknote className="h-4 w-4" />
+                    <span>Cash on Delivery</span>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 opacity-60">
+                  <RadioGroupItem value="card" id="card" disabled />
+                  <Label
+                    htmlFor="card"
                     className="flex items-center space-x-2"
                   >
                     <CreditCard className="h-4 w-4" />
-                    <span>Credit Card</span>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="paypal" id="paypal" />
-                  <Label
-                    htmlFor="paypal"
-                    className="flex items-center space-x-2"
-                  >
-                    <PlayIcon className="h-4 w-4" />
-                    <span>PayPal</span>
+                    <span>Pay by card online (coming soon)</span>
                   </Label>
                 </div>
               </RadioGroup>
-              {paymentMethod === "credit-card" && (
-                <div className="mt-4 space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="card-number">Card Number</Label>
-                    <Input
-                      id="card-number"
-                      placeholder="1234 5678 9012 3456"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="expiry-date">Expiry Date</Label>
-                      <Input id="expiry-date" placeholder="MM/YY" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="cvv">CVV</Label>
-                      <Input id="cvv" placeholder="123" required />
-                    </div>
-                  </div>
-                </div>
-              )}
+              <p className="mt-3 text-xs text-muted-foreground">
+                Online card payments will be processed securely by our payment
+                provider. We never store your card details.
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -174,36 +220,41 @@ export default function CheckoutPage() {
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {cartItems.map((item) => (
+              {cart.map((item) => (
                 <div key={item.id} className="flex justify-between">
                   <span>
-                    {item.name} x {item.quantity}
+                    {(item.name ?? "Product")} x {item.quantity}
                   </span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span>
+                    {formatCurrency((item.price ?? 0) * item.quantity)}
+                  </span>
                 </div>
               ))}
-              <div className="border-t pt-4">
+              <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Delivery Fee</span>
-                  <span>${deliveryFee.toFixed(2)}</span>
+                  <span>{formatCurrency(deliveryFee)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{formatCurrency(tax)}</span>
                 </div>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>${total.toFixed(2)}</span>
+                <span>{formatCurrency(total)}</span>
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Place Order
+              <Button type="submit" className="w-full" disabled={submitting}>
+                {submitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {submitting ? "Placing order…" : "Place Order"}
               </Button>
             </CardFooter>
           </Card>

@@ -1,69 +1,89 @@
-import React from "react";
-import Image from "next/image";
+"use client";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-const featuredProducts = [
-  {
-    id: 1,
-    name: "Chocolate Cake",
-    description: "Rich and moist chocolate cake",
-    price: "$25.99",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 2,
-    name: "Strawberry Tart",
-    description: "Fresh strawberries on a creamy base",
-    price: "$18.99",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 3,
-    name: "Macarons Set",
-    description: "Assorted flavors of French macarons",
-    price: "$15.99",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-  {
-    id: 4,
-    name: "Cinnamon Rolls",
-    description: "Soft and gooey cinnamon rolls",
-    price: "$12.99",
-    image: "/placeholder.svg?height=200&width=200",
-  },
-];
+import { getAllProducts } from "@/utils/api";
+import { useCart } from "@/context/CartContext";
+import { formatCurrency } from "@/lib/currency";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import type { Product } from "@/types";
 
 const FeaturedProductsSection = () => {
+  const { addToCart } = useCart();
+  const { data, isLoading } = useQuery<Product[]>({
+    queryKey: ["featured-products"],
+    queryFn: () => getAllProducts(),
+  });
+
+  const products = (data ?? []).slice(0, 4);
+
   return (
     <section className="py-16 bg-background">
       <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold mb-8 text-center">
           Featured Products
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {featuredProducts.map((product) => (
-            <Card key={product.id} className="overflow-hidden">
-              <Image
-                src={product.image}
-                alt={product.name}
-                width={200}
-                height={200}
-                className="w-full h-48 object-cover"
-              />
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                <p className="text-muted-foreground mb-2">
-                  {product.description}
-                </p>
-                <div className="flex justify-between items-center">
-                  <span className="font-bold">{product.price}</span>
-                  <Button size="sm">Add to Cart</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <LoadingState key={i} rows={3} />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            Featured products will appear here soon.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <Card key={product.id} className="overflow-hidden">
+                <Link href={`/product/${product.id}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={product.images?.[0]?.url || "/placeholder.svg"}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="w-full h-48 object-cover"
+                  />
+                </Link>
+                <CardContent className="p-4">
+                  <Link href={`/product/${product.id}`}>
+                    <h3 className="font-semibold text-lg mb-2 hover:underline">
+                      {product.name}
+                    </h3>
+                  </Link>
+                  <p className="text-muted-foreground mb-2 line-clamp-2">
+                    {product.description}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold">
+                      {formatCurrency(Number(product.price))}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        addToCart({
+                          id: product.id,
+                          quantity: 1,
+                          name: product.name,
+                          price: Number(product.price),
+                          image: product.images?.[0]?.url,
+                        });
+                        toast.success("Added to cart.");
+                      }}
+                    >
+                      Add to Cart
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -25,7 +25,7 @@ export default function BusinessRegistration() {
     businessType: "",
     address: "",
     phoneNumber: "",
-    agreeToTerms: true,
+    agreeToTerms: false,
   });
 
   const [error, setError] = useState("");
@@ -210,7 +210,14 @@ export default function BusinessRegistration() {
                 htmlFor="terms"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                I agree to the terms and conditions
+                I agree to the{" "}
+                <Link href="/terms" className="text-primary hover:underline">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-primary hover:underline">
+                  Privacy Policy
+                </Link>
               </label>
             </div>
           </div>

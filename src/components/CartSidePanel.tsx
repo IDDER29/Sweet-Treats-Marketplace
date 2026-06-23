@@ -10,6 +10,7 @@ import { useCart } from "@/context/CartContext"; // Import your CartContext
 import { getProductById } from "@/utils/api"; // Your API fetch utility
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import AuthModals from "./AuthModals";
 
 interface ProductDetails {
@@ -25,6 +26,7 @@ interface ProductDetails {
 }
 
 export default function CartSidePanel() {
+  const router = useRouter();
   const { cartState, toggleCart, addToCart, removeFromCart } = useCart();
   const { cart, isCartOpen } = cartState;
   const [productDetails, setProductDetails] = useState<
@@ -79,7 +81,7 @@ export default function CartSidePanel() {
           {cart.length > 0 ? (
             cart.map((item) => {
               const product = productDetails[item.id];
-              const productImg = product?.images[0].url;
+              const productImg = product?.images?.[0]?.url || "/placeholder.svg";
 
               return (
                 <div key={item.id} className="flex items-center space-x-4 mb-4">
@@ -169,7 +171,14 @@ export default function CartSidePanel() {
             </span>
           </div>
           <Separator className="my-4" />
-          <Button className="w-full" onClick={() => {}}>
+          <Button
+            className="w-full"
+            disabled={cart.length === 0}
+            onClick={() => {
+              toggleCart();
+              router.push("/cart/checkout");
+            }}
+          >
             <ShoppingCart className="mr-2 h-4 w-4" /> Proceed to Checkout
           </Button>
         </div>

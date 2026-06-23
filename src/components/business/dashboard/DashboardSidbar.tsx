@@ -1,6 +1,14 @@
 "use client";
 import React, { useState } from "react";
-import { BarChart, Truck, Package, Home, Settings, X } from "lucide-react";
+import {
+  BarChart,
+  Truck,
+  Package,
+  Home,
+  Settings,
+  ShoppingBag,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,6 +57,12 @@ const Sidebar = () => {
             <Link href="/business/dashboard/products">
               <Package className="mr-2 h-4 w-4" />
               Products
+            </Link>
+          </Button>
+          <Button variant="ghost" className="w-full justify-start" asChild>
+            <Link href="/business/dashboard/orders">
+              <ShoppingBag className="mr-2 h-4 w-4" />
+              Orders
             </Link>
           </Button>
           <Button variant="ghost" className="w-full justify-start" asChild>
