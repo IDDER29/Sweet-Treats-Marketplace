@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import { CartProvider } from "../context/CartContext";
 import CartSidePanel from "@/components/CartSidePanel";
 import AuthModals from "@/components/AuthModals";
+import QueryProvider from "@/providers/QueryProvider";
+import { LocaleProvider } from "@/i18n/LocaleProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,14 +30,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <CartProvider>
-          <Navbar />
-          <CartSidePanel />
-          {children}
-          <Footer />
-          <AuthModals />
-          <ToastContainer />
-        </CartProvider>
+        <QueryProvider>
+          <LocaleProvider>
+            <CartProvider>
+              <Navbar />
+              <CartSidePanel />
+              {children}
+              <Footer />
+              <AuthModals />
+              <ToastContainer />
+            </CartProvider>
+          </LocaleProvider>
+        </QueryProvider>
       </body>
     </html>
   );
