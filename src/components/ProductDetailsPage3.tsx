@@ -19,23 +19,42 @@ import ProductImageGallery from "./products-deties/ProductImageGallery";
 import ProductInformation from "./products-deties/ProductInformation";
 import ReviewsSection from "./products-deties/ReviewsSection";
 
+interface ProductImage {
+  url: string;
+  name: string;
+}
+
+interface ProductDetails {
+  name: string;
+  rating: number;
+  reviewCount: number;
+  price: number;
+  description: string;
+  ingredients: string;
+  allergens: string;
+  size: string;
+  availability: string;
+  options: string[];
+  images: ProductImage[];
+}
+
 // Custom Hook to manage product fetching and state
-const useProductDetails = (productId: string) => {
-  const [product, setProduct] = useState();
+const useProductDetails = (productId: string | null) => {
+  const [product, setProduct] = useState<ProductDetails>();
   const [mainImage, setMainImage] = useState("");
-  const [images, setImages] = useState();
+  const [images, setImages] = useState<ProductImage[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProductData = async () => {
+      if (!productId) return;
       try {
         const product = await getProductById(productId);
         if (product) {
           setProduct(product);
-          console.log(product);
-          setMainImage(product.images?.[0].url || ""); // Ensure images exist
+          setMainImage(product.images?.[0]?.url || ""); // Ensure images exist
           setImages(product.images);
           setSelectedSize(product.options?.[0] || ""); // Ensure options exist
         } else {
@@ -77,7 +96,7 @@ export default function ProductDetailsPage() {
   const [allergens, setAllergens] = useState("");
   const [size, setSize] = useState("");
   const [availability, setAvailability] = useState("");
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -105,7 +124,7 @@ export default function ProductDetailsPage() {
       setOptions(options);
     }
   }, [product]);
-  console.log;
+
   // States for zoom effect and review form
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
@@ -118,8 +137,7 @@ export default function ProductDetailsPage() {
       toast.error("Review comment must be at least 10 characters long.");
       return;
     }
-    console.log("Submitted review:", newReview);
-    // Implement actual review submission logic here
+    // TODO(Phase 4): submit the review to the reviews API.
     setNewReview({ rating: 5, comment: "" });
     toast.success("Review submitted successfully.");
   };
@@ -133,7 +151,7 @@ export default function ProductDetailsPage() {
         {/* Product Information */}
         <ProductInformation
           productInfoData={{
-            id: productId,
+            id: productId ?? "",
             name,
             rating,
             reviewCount,
@@ -149,9 +167,7 @@ export default function ProductDetailsPage() {
       </div>
 
       {/* Reviews Section */}
-      <ReviewsSection
-        productReviewsData={[{ name: "idder", rating: 5, comment: "sadfsfd" }]}
-      />
+      <ReviewsSection productReviewsData={[]} />
     </div>
   );
 }

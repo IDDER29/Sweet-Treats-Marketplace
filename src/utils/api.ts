@@ -186,7 +186,10 @@ export const createNewProduct = async (productData: any) => {
 
     return response.data;
   } catch (error) {
-    console.error("Error submitting product:", error.message);
+    console.error(
+      "Error submitting product:",
+      error instanceof Error ? error.message : String(error)
+    );
     throw error;
   }
 };

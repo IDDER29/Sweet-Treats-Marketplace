@@ -24,7 +24,7 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 // Simulated API functions (replace with actual API calls in production)
-const simulateApiCall = (data: any) =>
+const simulateApiCall = <T,>(data: T): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(data), 1000));
 const simulateUserCheck = () =>
   simulateApiCall({ exists: Math.random() > 0.5 });
@@ -353,7 +353,7 @@ export function EnhancedAuthFlow() {
 
         {step === "verifyPhone" && (
           <div className="space-y-4">
-            <p className="text-center">We've sent a code to {phoneNumber}</p>
+            <p className="text-center">We&apos;ve sent a code to {phoneNumber}</p>
             <Input
               placeholder="Enter verification code"
               value={verificationCode}

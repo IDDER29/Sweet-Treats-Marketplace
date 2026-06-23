@@ -47,7 +47,7 @@ export default function Component() {
           <CardHeader>
             <CardTitle>Send us a message</CardTitle>
             <CardDescription>
-              We'll get back to you as soon as possible.
+              We&apos;ll get back to you as soon as possible.
             </CardDescription>
           </CardHeader>
           <CardContent>

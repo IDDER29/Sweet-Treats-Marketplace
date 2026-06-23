@@ -40,7 +40,10 @@ export const {
             throw new Error("User not found");
           }
         } catch (error) {
-          console.error("Authorize error:", error.message);
+          console.error(
+            "Authorize error:",
+            error instanceof Error ? error.message : String(error)
+          );
           throw new Error("Authentication failed");
         }
       },
@@ -68,7 +71,7 @@ export const {
     // Session callback to pass user ID to the session
     async session({ session, token }) {
       if (token?.id) {
-        session.user.id = token.id; // Add user ID to the session
+        session.user.id = String(token.id); // Add user ID to the session
       }
       return session;
     },

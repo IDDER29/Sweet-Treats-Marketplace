@@ -32,11 +32,13 @@ export default function CheckoutPage() {
 
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
 
-  const handleShippingInfoChange = (e) => {
+  const handleShippingInfoChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setShippingInfo({ ...shippingInfo, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Here you would typically send the order data to your backend
     console.log("Order submitted", { shippingInfo, paymentMethod });

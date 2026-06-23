@@ -3,9 +3,6 @@
 
 import { UTApi } from "uploadthing/server";
 
-// Create an instance of the UploadThing API
-const utapi = new UTApi();
-
 export async function DELETE(req: Request) {
   try {
     // Parse the request to extract the fileId
@@ -18,7 +15,9 @@ export async function DELETE(req: Request) {
       );
     }
 
-    // Delete the file using UploadThing API
+    // Instantiate lazily so `next build` doesn't require the UploadThing key
+    // at build time (the client validates the key in its constructor).
+    const utapi = new UTApi();
     await utapi.deleteFiles([fileId]);
 
     return new Response(JSON.stringify({ success: true }), { status: 200 });

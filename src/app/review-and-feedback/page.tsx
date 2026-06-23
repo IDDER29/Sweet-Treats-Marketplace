@@ -23,6 +23,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 // Mock data
+interface Product {
+  id: number;
+  name: string;
+  date: string;
+  image: string;
+}
+
 const purchasedProducts = [
   {
     id: 1,
@@ -39,13 +46,13 @@ const purchasedProducts = [
 ];
 
 export default function Component() {
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
 
   const handleSubmitReview = () => {
     console.log("Submitting review:", {
-      productId: selectedProduct.id,
+      productId: selectedProduct?.id,
       rating,
       review,
     });

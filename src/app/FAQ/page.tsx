@@ -51,7 +51,8 @@ const faqCategories = [
       },
       {
         question: "How do I request a refund?",
-        answer: `'If you're unsatisfied with your order, please contact our customer support within 24 hours of receiving your order to discuss refund options.' `,
+        answer:
+          "If you're unsatisfied with your order, please contact our customer support within 24 hours of receiving your order to discuss refund options.",
       },
     ],
   },

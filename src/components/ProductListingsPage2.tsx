@@ -24,6 +24,10 @@ import { getAllProducts } from "@/utils/api";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+interface ProductImage {
+  url: string;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -33,7 +37,7 @@ interface Product {
   dietary: string[];
   dietaryLabel: string[];
   rating: number;
-  images: string[];
+  images: ProductImage[];
 }
 
 interface DietaryPreferences {
@@ -153,7 +157,7 @@ const ProductListingsPage: React.FC = () => {
               max={50}
               step={1}
               value={priceRange}
-              onValueChange={setPriceRange}
+              onValueChange={(value) => setPriceRange([value[0], value[1]])}
               className="w-[200px]"
             />
           </div>

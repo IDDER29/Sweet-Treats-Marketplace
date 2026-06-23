@@ -114,9 +114,9 @@ export default function OrderConfirmationPage() {
       {/* Next Steps and Recommendations */}
       <div className="space-y-8">
         <div>
-          <h2 className="text-2xl font-bold mb-4">What's Next?</h2>
+          <h2 className="text-2xl font-bold mb-4">What&apos;s Next?</h2>
           <p className="text-muted-foreground">
-            Your order will be processed and prepared for delivery. You'll
+            Your order will be processed and prepared for delivery. You&apos;ll
             receive an email confirmation shortly with more details about your
             order and tracking information.
           </p>

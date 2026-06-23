@@ -38,7 +38,7 @@ const TestimonialsSection = () => {
                   <Star className="text-yellow-400 fill-current" />
                   <Star className="text-yellow-400 fill-current" />
                 </div>
-                <p className="mb-4 italic">"{testimonial.text}"</p>
+                <p className="mb-4 italic">&quot;{testimonial.text}&quot;</p>
                 <p className="font-semibold">- {testimonial.author}</p>
               </CardContent>
             </Card>

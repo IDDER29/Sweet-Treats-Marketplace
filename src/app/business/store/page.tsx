@@ -199,9 +199,9 @@ export default function BakeryStorePage() {
                   <span className="ml-2 text-sm text-gray-600">5.0</span>
                 </div>
                 <p className="text-sm mb-2">
-                  "Absolutely delicious! The croissants are perfectly flaky and
-                  the sourdough bread is to die for. This is now my go-to
-                  bakery!"
+                  &quot;Absolutely delicious! The croissants are perfectly flaky
+                  and the sourdough bread is to die for. This is now my go-to
+                  bakery!&quot;
                 </p>
                 <p className="text-sm font-semibold">- Happy Customer</p>
               </CardContent>

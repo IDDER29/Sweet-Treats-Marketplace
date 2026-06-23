@@ -9,8 +9,21 @@ import {
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function ProductCard({ product }) {
-  const renderStars = (rating) => {
+interface Product {
+  image: string;
+  name: string;
+  description: string;
+  price: number;
+  rating: number;
+  dietary: string[];
+}
+
+interface ProductCardProps {
+  product: Product;
+}
+
+export default function ProductCard({ product }: ProductCardProps) {
+  const renderStars = (rating: number) => {
     return Array(5)
       .fill(0)
       .map((_, i) => (

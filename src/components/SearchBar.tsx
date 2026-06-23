@@ -2,7 +2,12 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
-export default function SearchBar({ searchTerm, setSearchTerm }) {
+interface SearchBarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+}
+
+export default function SearchBar({ searchTerm, setSearchTerm }: SearchBarProps) {
   return (
     <div className="mb-8 space-y-4">
       <div className="flex items-center space-x-2">

@@ -2,46 +2,37 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Icons from "./Icons";
 
-// Mock data
+// Mock data — TODO(Phase 3): replace with real metrics from the analytics API.
 const overviewData = {
   totalSales: 15000,
   totalOrders: 150,
   bestSeller: "Chocolate Cake",
 };
-let sectionTitle: any = null;
-let overviewDataValue: any = null;
+
+const overviewConfig: Record<
+  string,
+  { label: string; value: string | number }
+> = {
+  totalSales: { label: "Total Sales", value: `$${overviewData.totalSales}` },
+  totalOrders: { label: "Total Orders", value: overviewData.totalOrders },
+  bestSeller: { label: "Best Seller", value: overviewData.bestSeller },
+};
+
 const OverviewCard = ({ title }: { title: string }) => {
-  setoverviewValues(title);
+  const config = overviewConfig[title];
+  if (!config) return null;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{sectionTitle}</CardTitle>
+        <CardTitle className="text-sm font-medium">{config.label}</CardTitle>
         <Icons title={title} />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{overviewDataValue}</div>
+        <div className="text-2xl font-bold">{config.value}</div>
       </CardContent>
     </Card>
   );
-};
-
-const setoverviewValues = (title: string) => {
-  switch (title) {
-    case "totalSales":
-      sectionTitle = "Total Sales";
-      overviewDataValue = `$${overviewData.totalSales}`;
-      break;
-    case "totalOrders":
-      sectionTitle = "Total Orders";
-      overviewDataValue = overviewData.totalOrders;
-      break;
-    case "bestSeller":
-      sectionTitle = "Best Seller";
-      overviewDataValue = overviewData.bestSeller;
-      break;
-    default:
-      return null;
-  }
 };
 
 export default OverviewCard;
