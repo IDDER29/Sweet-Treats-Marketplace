@@ -37,6 +37,48 @@ import {
 } from "@/services/reviews";
 import { toast } from "react-toastify";
 
+// ── Demo data (fallback when API returns empty) ───────────────────────────────
+
+const DEMO_STORE_REVIEWS: StoreReview[] = [
+  {
+    id: "r1",
+    productId: "101",
+    productName: "Chocolate Lava Cake",
+    author: "Amelia Johnson",
+    rating: 5,
+    comment: "Absolutely divine! The centre was perfectly gooey and the cake arrived still warm. Will definitely order again — my whole family loved it.",
+    createdAt: "2026-06-20T10:30:00Z",
+    reply: "Thank you so much, Amelia! We're so happy you and your family enjoyed it. See you soon!",
+  },
+  {
+    id: "r2",
+    productId: "204",
+    productName: "Strawberry Macarons (Box of 6)",
+    author: "Clara Nguyen",
+    rating: 4,
+    comment: "Delicate, light, and beautifully presented. The strawberry flavour is natural and not too sweet. Lost one star because one macaron was slightly cracked on arrival.",
+    createdAt: "2026-06-18T14:15:00Z",
+  },
+  {
+    id: "r3",
+    productId: "318",
+    productName: "Honey Baklava Roll",
+    author: "Ben Okafor",
+    rating: 5,
+    comment: "Reminded me of my grandmother's baklava. Perfectly syrupy and crispy. Worth every penny! I've already recommended it to three friends.",
+    createdAt: "2026-06-22T09:00:00Z",
+  },
+  {
+    id: "r4",
+    productId: "101",
+    productName: "Chocolate Lava Cake",
+    author: "Emma Rossi",
+    rating: 3,
+    comment: "Good flavour but arrived a bit cold. The packaging could be improved for longer deliveries. I'd try again on a shorter route.",
+    createdAt: "2026-06-21T16:45:00Z",
+  },
+];
+
 function StarRow({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
   const sz = size === "md" ? "h-4 w-4" : "h-3.5 w-3.5";
   return (
@@ -204,10 +246,11 @@ export default function ReviewsDashboardPage() {
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [replyFilter, setReplyFilter] = useState<string>("all");
 
-  const { data: reviews = [], isLoading, isError, refetch } = useQuery<StoreReview[]>({
+  const { data: apiReviews = [], isLoading, isError, refetch } = useQuery<StoreReview[]>({
     queryKey: ["store-reviews"],
     queryFn: getBusinessReviews,
   });
+  const reviews = apiReviews.length > 0 ? apiReviews : DEMO_STORE_REVIEWS;
 
   const filtered = reviews.filter((r) => {
     const matchesSearch =

@@ -31,7 +31,34 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { EmptyState } from "@/components/feedback/EmptyState";
-import { getDeliverySummary } from "@/services/analytics";
+import { getDeliverySummary, type DeliverySummary } from "@/services/analytics";
+
+// ── Demo data ─────────────────────────────────────────────────────────────────
+
+const DEMO_SUMMARY: DeliverySummary = {
+  deliveredToday: 6,
+  inTransit: 2,
+  totalDeliveries: 247,
+  averageDeliveryMinutes: 22,
+  active: [
+    {
+      id: "a1",
+      orderNumber: "ORD-4821",
+      customer: "Amelia Johnson",
+      address: "14 Rue Hassan II, Downtown",
+      status: "in_transit",
+      eta: "~8 min",
+    },
+    {
+      id: "a2",
+      orderNumber: "ORD-4822",
+      customer: "Ben Okafor",
+      address: "Résidence Agdal, Bloc C, Apt 12",
+      status: "assigned",
+      eta: "~20 min",
+    },
+  ],
+};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -56,13 +83,15 @@ export default function DeliveryDashboard() {
   const driverEmail = session?.user?.email ?? "";
   const initials = getInitials(session?.user?.name);
 
-  const { data: summary, isLoading } = useQuery({
+  const { data: apiSummary, isLoading } = useQuery({
     queryKey: ["delivery-summary"],
     queryFn: () => getDeliverySummary(),
     refetchInterval: 30_000,
   });
 
-  const activeDeliveries = summary?.active ?? [];
+  const isEmpty = !apiSummary?.totalDeliveries && !apiSummary?.active?.length;
+  const summary = isEmpty ? DEMO_SUMMARY : (apiSummary ?? DEMO_SUMMARY);
+  const activeDeliveries = summary.active;
 
   return (
     <div className="min-h-screen bg-gray-50">

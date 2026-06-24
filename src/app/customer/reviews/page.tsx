@@ -40,6 +40,38 @@ import {
 
 type FilterTab = "all" | "published" | "pending";
 
+// ─── Demo data (fallback when API returns empty) ───────────────────────────────
+
+const DEMO_REVIEWS: MyReview[] = [
+  {
+    id: "d1",
+    productId: "101",
+    productName: "Chocolate Lava Cake",
+    rating: 5,
+    text: "Absolutely divine! The centre was perfectly gooey and the cake arrived still warm. Will definitely order again — my whole family loved it.",
+    dateSubmitted: "Jun 20, 2026",
+    status: "published",
+  },
+  {
+    id: "d2",
+    productId: "204",
+    productName: "Strawberry Macarons (Box of 6)",
+    rating: 4,
+    text: "Delicate, light, and beautifully presented. The strawberry flavour is natural and not too sweet. Lost one star because one macaron was slightly cracked.",
+    dateSubmitted: "Jun 15, 2026",
+    status: "published",
+  },
+  {
+    id: "d3",
+    productId: "318",
+    productName: "Honey Baklava Roll",
+    rating: 5,
+    text: "Reminded me of my grandmother's baklava. Perfectly syrupy and crispy. Worth every penny!",
+    dateSubmitted: "Jun 22, 2026",
+    status: "pending",
+  },
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function StarRating({
@@ -290,10 +322,11 @@ const EMPTY_MESSAGES: Record<FilterTab, { title: string; message: string }> = {
 export default function MyReviewsPage() {
   const [activeTab, setActiveTab] = useState<FilterTab>("all");
 
-  const { data: reviews = [], isLoading, isError, refetch } = useQuery<MyReview[]>({
+  const { data: apiReviews = [], isLoading, isError, refetch } = useQuery<MyReview[]>({
     queryKey: ["my-reviews"],
     queryFn: getMyReviews,
   });
+  const reviews = apiReviews.length > 0 ? apiReviews : DEMO_REVIEWS;
 
   const publishedCount = reviews.filter((r) => r.status === "published").length;
   const pendingCount = reviews.filter((r) => r.status === "pending").length;

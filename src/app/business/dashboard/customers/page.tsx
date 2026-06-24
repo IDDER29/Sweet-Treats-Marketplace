@@ -47,6 +47,68 @@ const FILTERS: { value: FilterValue; label: string }[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Demo data
+// ---------------------------------------------------------------------------
+
+const DEMO_CUSTOMERS: Customer[] = [
+  {
+    id: "c1",
+    name: "Amelia Johnson",
+    email: "amelia.j@example.com",
+    totalOrders: 12,
+    totalSpent: 284.50,
+    lastOrderDate: "2026-06-20",
+    customerSince: "2025-11-03",
+    isRepeat: true,
+    isNewThisMonth: false,
+  },
+  {
+    id: "c2",
+    name: "Ben Okafor",
+    email: "ben.okafor@example.com",
+    totalOrders: 1,
+    totalSpent: 34.00,
+    lastOrderDate: "2026-06-22",
+    customerSince: "2026-06-22",
+    isRepeat: false,
+    isNewThisMonth: true,
+  },
+  {
+    id: "c3",
+    name: "Clara Nguyen",
+    email: "clara.n@example.com",
+    totalOrders: 7,
+    totalSpent: 198.75,
+    lastOrderDate: "2026-06-18",
+    customerSince: "2026-01-14",
+    isRepeat: true,
+    isNewThisMonth: false,
+  },
+  {
+    id: "c4",
+    name: "David Al-Hassan",
+    email: "d.alhassan@example.com",
+    totalOrders: 3,
+    totalSpent: 76.20,
+    lastOrderDate: "2026-06-15",
+    customerSince: "2026-04-02",
+    isRepeat: true,
+    isNewThisMonth: false,
+  },
+  {
+    id: "c5",
+    name: "Emma Rossi",
+    email: "emma.rossi@example.com",
+    totalOrders: 1,
+    totalSpent: 22.50,
+    lastOrderDate: "2026-06-21",
+    customerSince: "2026-06-21",
+    isRepeat: false,
+    isNewThisMonth: true,
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Service
 // ---------------------------------------------------------------------------
 
@@ -94,10 +156,11 @@ export default function CustomersPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterValue>("all");
 
-  const { data: customers = [], isLoading, isError, refetch } = useQuery<Customer[]>({
+  const { data: apiCustomers = [], isLoading, isError, refetch } = useQuery<Customer[]>({
     queryKey: ["store-customers"],
     queryFn: getMyStoreCustomers,
   });
+  const customers = apiCustomers.length > 0 ? apiCustomers : DEMO_CUSTOMERS;
 
   // ---------- Summary stats ----------
   const totalCustomers = customers.length;

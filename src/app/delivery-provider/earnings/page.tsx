@@ -65,6 +65,32 @@ interface EarningsSummary {
 }
 
 // ---------------------------------------------------------------------------
+// Demo data
+// ---------------------------------------------------------------------------
+
+const DEMO_EARNINGS: EarningsSummary = {
+  weekTotal: 156.50,
+  monthTotal: 612.75,
+  lifetimeTotal: 4830.20,
+  totalDeliveries: 247,
+  nextPayoutDate: "2026-06-30",
+  nextPayoutAmount: 142.50,
+  deliveries: [
+    { id: "d1", date: "2026-06-23", orderNum: "#ORD-4821", area: "Downtown", distance: "3.2 km", earnings: 8.50, tip: 1.50 },
+    { id: "d2", date: "2026-06-23", orderNum: "#ORD-4817", area: "Agdal", distance: "5.1 km", earnings: 10.00, tip: 2.00 },
+    { id: "d3", date: "2026-06-22", orderNum: "#ORD-4809", area: "Medina", distance: "2.8 km", earnings: 7.50, tip: 0.00 },
+    { id: "d4", date: "2026-06-21", orderNum: "#ORD-4798", area: "Hay Riad", distance: "6.4 km", earnings: 12.00, tip: 3.00 },
+    { id: "d5", date: "2026-06-20", orderNum: "#ORD-4782", area: "Souissi", distance: "4.0 km", earnings: 9.00, tip: 2.50 },
+    { id: "d6", date: "2026-06-17", orderNum: "#ORD-4751", area: "Océan", distance: "3.8 km", earnings: 8.00, tip: 0.00 },
+  ],
+  payouts: [
+    { id: "p1", date: "Mon 16 Jun 2026", amount: 98.75, status: "paid" },
+    { id: "p2", date: "Mon 9 Jun 2026", amount: 115.20, status: "paid" },
+    { id: "p3", date: "Mon 2 Jun 2026", amount: 87.00, status: "paid" },
+  ],
+};
+
+// ---------------------------------------------------------------------------
 // Service
 // ---------------------------------------------------------------------------
 
@@ -106,6 +132,9 @@ export default function EarningsPage() {
     toast.info("Coming soon — statement download will be available shortly.");
   }
 
+  const isEmpty = !data?.totalDeliveries && !data?.deliveries?.length;
+  const summary = (isError || isEmpty) ? DEMO_EARNINGS : data!;
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -141,7 +170,6 @@ export default function EarningsPage() {
     );
   }
 
-  const summary = data!;
   const deliveries = summary.deliveries;
   const payouts = summary.payouts;
 
