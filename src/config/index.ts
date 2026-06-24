@@ -90,6 +90,7 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
       { label: "Deals & Offers", href: "/deals" },
       { label: "Gift Guide", href: "/gift-guide" },
       { label: "Stores", href: "/stores" },
+      { label: "Search", href: "/search" },
     ],
   },
   {
@@ -99,8 +100,19 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
       { label: "How It Works", href: "/how-it-works" },
       { label: "Sell on Sweet Treats", href: "/sell" },
       { label: "Blog", href: "/blog" },
+      { label: "Careers", href: "/careers" },
+      { label: "Press", href: "/press" },
       { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      { label: "Help Center", href: "/help" },
       { label: "FAQ", href: "/FAQ" },
+      { label: "Refund Policy", href: "/refund-policy" },
+      { label: "Accessibility", href: "/accessibility" },
+      { label: "Cookie Policy", href: "/cookie-policy" },
     ],
   },
   {
@@ -108,7 +120,6 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
-      { label: "Refund Policy", href: "/refund-policy" },
       { label: "Sitemap", href: "/sitemap" },
     ],
   },

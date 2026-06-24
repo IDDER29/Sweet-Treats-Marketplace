@@ -45,6 +45,7 @@ const Navbar = async () => {
           { href: "/customer/notifications", label: "Notifications" },
           { href: "/customer/reviews", label: "My Reviews" },
           { href: "/customer/payment-methods", label: "Payment Methods" },
+          { href: "/customer/loyalty", label: "Rewards" },
         ];
 
   return (
