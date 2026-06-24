@@ -15,10 +15,17 @@ interface BusinessRegistrationData {
   agreeToTerms: boolean;
 }
 
+interface BusinessData {
+  id: string;
+  name: string;
+  email: string;
+  [key: string]: unknown;
+}
+
 interface ApiResponse {
   success: boolean;
   message: string;
-  data?: any;
+  data?: BusinessData;
 }
 
 // Create axios instance
@@ -160,7 +167,7 @@ export const businessesLogIn = async (
   }
 };
 
-export const createNewProduct = async (productData: any) => {
+export const createNewProduct = async (productData: Record<string, unknown>) => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
     const session = await auth();
@@ -238,7 +245,7 @@ export async function getProductById(productId: string) {
 
 export async function updateProduct(
   productId: string,
-  updatedProductData: any
+  updatedProductData: Record<string, unknown>
 ) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {

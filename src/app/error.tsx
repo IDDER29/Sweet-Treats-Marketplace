@@ -12,7 +12,8 @@ interface ErrorPageProps {
 
 export default function Error({ error, reset }: ErrorPageProps) {
   useEffect(() => {
-    console.error("[Sweet Treats] Unhandled error:", error);
+    // Forward to an error reporting service in production
+    if (process.env.NODE_ENV !== "development") return;
   }, [error]);
 
   return (

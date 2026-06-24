@@ -33,14 +33,10 @@ export function AuthFlow() {
   const [isExistingUser, setIsExistingUser] = useState(false);
 
   const handleGoogleAuth = () => {
-    // Simulate Google authentication
-    console.log("Authenticating with Google");
     checkUserExistence(true);
   };
 
   const handleFacebookAuth = () => {
-    // Simulate Facebook authentication
-    console.log("Authenticating with Facebook");
     checkUserExistence(true);
   };
 
@@ -57,22 +53,18 @@ export function AuthFlow() {
   };
 
   const handlePhoneSubmit = () => {
-    console.log("Phone number submitted:", phoneNumber);
     setStep("verifyPhone");
   };
 
   const handleCodeVerification = () => {
-    console.log("Verifying code:", verificationCode);
     setStep(isExistingUser ? "verifyInfo" : "Authenticate");
   };
 
   const handleAddressSubmit = () => {
-    console.log("Address submitted:", address);
     setStep("verifyInfo");
   };
 
   const handleVerifyInfo = () => {
-    console.log("Information verified");
     setStep("complete");
   };
 

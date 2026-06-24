@@ -19,8 +19,6 @@ export function SignInModal() {
 
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign in logic here
-    console.log("Sign in submitted");
   };
 
   return (
@@ -71,7 +69,7 @@ export function SignInModal() {
             <Button
               variant="outline"
               type="button"
-              onClick={() => console.log("Sign in with Google")}
+              onClick={() => {}}
             >
               <svg
                 className="mr-2 h-4 w-4"
@@ -93,7 +91,7 @@ export function SignInModal() {
             <Button
               variant="outline"
               type="button"
-              onClick={() => console.log("Sign in with Facebook")}
+              onClick={() => {}}
             >
               <Facebook className="mr-2 h-4 w-4" />
               Facebook

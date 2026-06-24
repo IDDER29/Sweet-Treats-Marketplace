@@ -23,8 +23,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
     slidesToShow: 1,
     slidesToScroll: 1,
   };
-  console.log(images[0].url);
-
   return (
     <div className="product-image-gallery">
       <Slider {...settings}>

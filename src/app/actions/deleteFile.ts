@@ -17,11 +17,7 @@ export async function deleteFile(fileId: string) {
     }
 
     return { success: true };
-  } catch (error) {
-    console.error(
-      "Error deleting file:",
-      error instanceof Error ? error.message : String(error)
-    );
+  } catch {
     return { success: false };
   }
 }

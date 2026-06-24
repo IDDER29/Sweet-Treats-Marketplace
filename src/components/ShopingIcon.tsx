@@ -2,12 +2,13 @@
 import React from "react";
 import { ShoppingCartIcon } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import type { CartItem } from "@/context/CartContext";
 
 const ShopingIcon = () => {
   const { cartState, toggleCart } = useCart();
 
   const cartCount = cartState.cart.reduce(
-    (acc: number, item: any) => acc + item.quantity,
+    (acc: number, item: CartItem) => acc + item.quantity,
     0
   );
 

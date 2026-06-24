@@ -25,11 +25,11 @@ export const {
         try {
           const businesses = await getBusinessesByEmail(email);
 
-          if (businesses?.success) {
+          if (businesses?.success && businesses.data) {
             const response = await businessesLogIn(email, password);
             if (response?.success) {
               return {
-                id: businesses.data.id, // return user details
+                id: businesses.data.id,
                 name: businesses.data.name,
                 email: businesses.data.email,
                 role: "business" as UserRole,

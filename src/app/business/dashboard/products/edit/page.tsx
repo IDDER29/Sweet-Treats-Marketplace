@@ -25,11 +25,13 @@ interface ImageObject {
   key: string;
 }
 
-// Reducer to manage image state (add, delete)
-const imageReducer = (state: ImageObject[], action: any) => {
+type ImageAction =
+  | { type: "ADD_IMAGES"; payload: ImageObject[] }
+  | { type: "DELETE_IMAGE"; payload: string };
+
+const imageReducer = (state: ImageObject[], action: ImageAction): ImageObject[] => {
   switch (action.type) {
     case "ADD_IMAGES":
-      // Replace the current images with the new ones from the payload (avoid duplication)
       return [
         ...new Set<string>(
           action.payload.map((img: ImageObject) => JSON.stringify(img))

@@ -41,8 +41,7 @@ const Actions = ({ product, onChanged }: ActionsProps) => {
       } else {
         router.refresh();
       }
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    } catch {
       toast.error("Failed to delete product. Please try again.");
     } finally {
       setDeleting(false);
