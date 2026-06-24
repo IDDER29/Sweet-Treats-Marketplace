@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { Heart, ShoppingCart, Trash2 } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 
 import { getWishlist, removeFromWishlist } from "@/services/wishlist";
 import type { ID, Product } from "@/types";
@@ -13,7 +13,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { ErrorState } from "@/components/feedback/ErrorState";
-import { EmptyState } from "@/components/feedback/EmptyState";
 
 function productImage(product: Product): string | undefined {
   return product.images?.[0]?.url;
@@ -72,77 +71,112 @@ export default function WishlistGrid() {
 
   if (!products || products.length === 0) {
     return (
-      <EmptyState
-        icon={<Heart className="h-10 w-10" />}
-        title="Your wishlist is empty"
-        message="Save treats you love and find them here later."
-        actionLabel="Browse products"
-        actionHref="/products"
-      />
+      <div className="flex flex-col items-center gap-5 py-20 text-center">
+        <div className="rounded-full bg-rose-50 p-6">
+          <Heart className="h-12 w-12 text-rose-300" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold text-gray-800">
+            Start saving your favourites!
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Tap the heart on any product to save it here and order it later.
+          </p>
+        </div>
+        <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
+          <Link href="/products">Browse Products</Link>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {products.map((product) => {
-        const image = productImage(product);
-        return (
-          <Card key={product.id} className="flex flex-col overflow-hidden">
-            <Link
-              href={`/product/${product.id}`}
-              className="block aspect-square w-full overflow-hidden bg-muted"
-            >
-              {image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={image}
-                  alt={product.name}
-                  className="h-full w-full object-cover transition-transform hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                  No image
-                </div>
-              )}
-            </Link>
+    <div className="space-y-6">
+      {/* Header with count */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-gray-900">
+          My Wishlist{" "}
+          <span className="text-amber-600">({products.length} items)</span>
+        </h2>
+      </div>
 
-            <CardContent className="flex-1 space-y-1 p-4">
+      {/* Grid */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+        {products.map((product) => {
+          const image = productImage(product);
+          const isRemoving =
+            removeMutation.isPending &&
+            removeMutation.variables === product.id;
+
+          return (
+            <Card
+              key={product.id}
+              className="flex flex-col overflow-hidden group hover:shadow-md transition-shadow duration-200"
+            >
+              {/* Product image */}
               <Link
                 href={`/product/${product.id}`}
-                className="line-clamp-2 font-semibold hover:underline"
+                className="block aspect-square w-full overflow-hidden bg-amber-50 relative"
               >
-                {product.name}
+                {image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image}
+                    alt={product.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Heart className="h-10 w-10 text-amber-200" />
+                  </div>
+                )}
               </Link>
-              <p className="text-sm text-muted-foreground">
-                {product.category}
-              </p>
-              <p className="font-semibold">{formatCurrency(product.price)}</p>
-            </CardContent>
 
-            <CardFooter className="flex gap-2 p-4 pt-0">
-              <Button
-                className="flex-1"
-                onClick={() => handleAddToCart(product)}
-              >
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to cart
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                aria-label={`Remove ${product.name} from wishlist`}
-                disabled={
-                  removeMutation.isPending &&
-                  removeMutation.variables === product.id
-                }
-                onClick={() => removeMutation.mutate(product.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
-        );
-      })}
+              {/* Product info */}
+              <CardContent className="flex-1 p-3 space-y-1">
+                <Link
+                  href={`/product/${product.id}`}
+                  className="line-clamp-2 text-sm font-semibold text-gray-800 hover:text-amber-700 leading-snug"
+                >
+                  {product.name}
+                </Link>
+                {product.category && (
+                  <p className="text-xs text-muted-foreground truncate">
+                    {product.category}
+                  </p>
+                )}
+                <p className="text-sm font-bold text-amber-800">
+                  {formatCurrency(product.price)}
+                </p>
+              </CardContent>
+
+              {/* Action buttons */}
+              <CardFooter className="flex gap-2 p-3 pt-0">
+                <Button
+                  size="sm"
+                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-xs h-8"
+                  onClick={() => handleAddToCart(product)}
+                >
+                  <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                  Add to cart
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`Remove ${product.name} from wishlist`}
+                  disabled={isRemoving}
+                  onClick={() => removeMutation.mutate(product.id)}
+                  className="h-8 w-8 text-gray-400 hover:text-rose-500 hover:bg-rose-50 shrink-0"
+                >
+                  <Heart
+                    className={`h-4 w-4 ${isRemoving ? "opacity-50" : "fill-rose-400 text-rose-400"}`}
+                  />
+                </Button>
+              </CardFooter>
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

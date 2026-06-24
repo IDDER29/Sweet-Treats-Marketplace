@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import {
@@ -29,6 +30,57 @@ import {
   type NotificationSettings,
   type UpdateBusinessSettingsInput,
 } from "@/lib/settings";
+import {
+  Building2,
+  Bell,
+  Lock,
+  CreditCard,
+  Camera,
+  CheckCircle2,
+} from "lucide-react";
+
+function PasswordStrengthBar({ password }: { password: string }) {
+  const len = password.length;
+  let strength = 0;
+  let label = "";
+  let barColor = "";
+
+  if (len === 0) {
+    return null;
+  } else if (len < 6) {
+    strength = 1;
+    label = "Weak";
+    barColor = "bg-red-500";
+  } else if (len < 9) {
+    strength = 2;
+    label = "Medium";
+    barColor = "bg-yellow-500";
+  } else {
+    strength = 3;
+    label = "Strong";
+    barColor = "bg-green-500";
+  }
+
+  return (
+    <div className="mt-2">
+      <div className="flex gap-1 mb-1">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i <= strength ? barColor : "bg-gray-200"
+            }`}
+          />
+        ))}
+      </div>
+      <p className={`text-xs font-medium ${
+        strength === 1 ? "text-red-600" : strength === 2 ? "text-yellow-600" : "text-green-600"
+      }`}>
+        {label} password
+      </p>
+    </div>
+  );
+}
 
 export default function SettingsClient() {
   const { data, isLoading, isError, refetch } = useQuery<BusinessSettings>({
@@ -55,6 +107,9 @@ export default function SettingsClient() {
 
   // Billing tab
   const [billingEmail, setBillingEmail] = useState<string>("");
+
+  // Save confirmation state per tab
+  const [savedTab, setSavedTab] = useState<string | null>(null);
 
   // Hydrate controlled inputs from fetched data.
   useEffect(() => {
@@ -89,18 +144,18 @@ export default function SettingsClient() {
 
   const handleSaveGeneral = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutation.mutate({
-      storeName,
-      storeDescription,
-      storeAddress,
-      phoneNumber,
-      email,
-    });
+    mutation.mutate(
+      { storeName, storeDescription, storeAddress, phoneNumber, email },
+      { onSuccess: () => setSavedTab("general") }
+    );
   };
 
   const handleSaveNotifications = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutation.mutate({ notifications });
+    mutation.mutate(
+      { notifications },
+      { onSuccess: () => setSavedTab("notifications") }
+    );
   };
 
   const handleSaveSecurity = (e: React.FormEvent<HTMLFormElement>) => {
@@ -109,19 +164,29 @@ export default function SettingsClient() {
       toast.error("New passwords do not match.");
       return;
     }
-    mutation.mutate({
-      currentPassword: currentPassword || undefined,
-      newPassword: newPassword || undefined,
-      twoFactorEnabled,
-    });
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    mutation.mutate(
+      {
+        currentPassword: currentPassword || undefined,
+        newPassword: newPassword || undefined,
+        twoFactorEnabled,
+      },
+      {
+        onSuccess: () => {
+          setSavedTab("security");
+          setCurrentPassword("");
+          setNewPassword("");
+          setConfirmPassword("");
+        },
+      }
+    );
   };
 
   const handleSaveBilling = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutation.mutate({ billingEmail });
+    mutation.mutate(
+      { billingEmail },
+      { onSuccess: () => setSavedTab("billing") }
+    );
   };
 
   if (isLoading) {
@@ -147,27 +212,65 @@ export default function SettingsClient() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Manage your store preferences, notifications, and account security.
+        </p>
+      </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+      <Tabs defaultValue="general" className="space-y-4" onValueChange={() => setSavedTab(null)}>
+        <TabsList className="grid w-full grid-cols-4 h-auto p-1">
+          <TabsTrigger value="general" className="flex flex-col gap-1 py-2 text-xs">
+            <Building2 className="h-4 w-4" />
+            <span>Store</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex flex-col gap-1 py-2 text-xs">
+            <Bell className="h-4 w-4" />
+            <span>Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex flex-col gap-1 py-2 text-xs">
+            <Lock className="h-4 w-4" />
+            <span>Password</span>
+          </TabsTrigger>
+          <TabsTrigger value="billing" className="flex flex-col gap-1 py-2 text-xs">
+            <CreditCard className="h-4 w-4" />
+            <span>Payment</span>
+          </TabsTrigger>
         </TabsList>
 
+        {/* General / Store Tab */}
         <TabsContent value="general">
           <form onSubmit={handleSaveGeneral}>
             <Card>
               <CardHeader>
-                <CardTitle>General Settings</CardTitle>
+                <CardTitle>Store Settings</CardTitle>
                 <CardDescription>
-                  Manage your account settings and set e-mail preferences.
+                  Manage your store profile and contact information.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
+                {/* Logo / Profile Picture Upload Placeholder */}
+                <div>
+                  <p className="text-sm font-medium mb-3">Store Logo</p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-100 to-orange-200 flex items-center justify-center border-2 border-dashed border-amber-300 flex-shrink-0">
+                      <Camera className="h-7 w-7 text-amber-400" />
+                    </div>
+                    <div>
+                      <Button type="button" variant="outline" size="sm">
+                        Upload Logo
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        Recommended: square image, at least 200×200px
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div className="space-y-2">
                   <Label htmlFor="store-name">Store Name</Label>
                   <Input
@@ -186,6 +289,8 @@ export default function SettingsClient() {
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                       setStoreDescription(e.target.value)
                     }
+                    className="resize-none"
+                    rows={3}
                   />
                 </div>
                 <div className="space-y-2">
@@ -198,107 +303,173 @@ export default function SettingsClient() {
                     }
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="store-phone">Phone Number</Label>
-                  <Input
-                    id="store-phone"
-                    value={phoneNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setPhoneNumber(e.target.value)
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="store-email">Email Address</Label>
-                  <Input
-                    id="store-email"
-                    type="email"
-                    value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setEmail(e.target.value)
-                    }
-                  />
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="store-phone">Phone Number</Label>
+                    <Input
+                      id="store-phone"
+                      value={phoneNumber}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setPhoneNumber(e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="store-email">Email Address</Label>
+                    <Input
+                      id="store-email"
+                      type="email"
+                      value={email}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setEmail(e.target.value)
+                      }
+                    />
+                  </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex items-center gap-3">
                 <Button type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Save Changes"}
                 </Button>
+                {savedTab === "general" && (
+                  <span className="flex items-center gap-1.5 text-sm text-green-600">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Saved
+                  </span>
+                )}
               </CardFooter>
             </Card>
           </form>
         </TabsContent>
 
+        {/* Notifications Tab */}
         <TabsContent value="notifications">
           <form onSubmit={handleSaveNotifications}>
             <Card>
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
                 <CardDescription>
-                  Choose what notifications you want to receive.
+                  Choose which alerts you want to receive about your store activity.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="new-order">New Order Notifications</Label>
-                  <Switch
-                    id="new-order"
-                    checked={notifications.newOrder}
-                    onCheckedChange={(v: boolean) =>
-                      setNotification("newOrder", v)
-                    }
-                  />
+              <CardContent className="space-y-0 divide-y">
+                {/* Orders section */}
+                <div className="py-1 pb-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                    Orders
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="new-order" className="text-sm font-medium">
+                          New Order Notifications
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Receive an alert whenever a customer places an order
+                        </p>
+                      </div>
+                      <Switch
+                        id="new-order"
+                        checked={notifications.newOrder}
+                        onCheckedChange={(v: boolean) =>
+                          setNotification("newOrder", v)
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label htmlFor="order-status" className="text-sm font-medium">
+                          Order Status Updates
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Get notified when an order status changes
+                        </p>
+                      </div>
+                      <Switch
+                        id="order-status"
+                        checked={notifications.orderStatus}
+                        onCheckedChange={(v: boolean) =>
+                          setNotification("orderStatus", v)
+                        }
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="order-status">Order Status Updates</Label>
-                  <Switch
-                    id="order-status"
-                    checked={notifications.orderStatus}
-                    onCheckedChange={(v: boolean) =>
-                      setNotification("orderStatus", v)
-                    }
-                  />
+
+                {/* Inventory section */}
+                <div className="py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                    Inventory
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="low-stock" className="text-sm font-medium">
+                        Low Stock Alerts
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Alert when a product is running low or out of stock
+                      </p>
+                    </div>
+                    <Switch
+                      id="low-stock"
+                      checked={notifications.lowStock}
+                      onCheckedChange={(v: boolean) =>
+                        setNotification("lowStock", v)
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="low-stock">Low Stock Alerts</Label>
-                  <Switch
-                    id="low-stock"
-                    checked={notifications.lowStock}
-                    onCheckedChange={(v: boolean) =>
-                      setNotification("lowStock", v)
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="promotions">Promotional Emails</Label>
-                  <Switch
-                    id="promotions"
-                    checked={notifications.promotions}
-                    onCheckedChange={(v: boolean) =>
-                      setNotification("promotions", v)
-                    }
-                  />
+
+                {/* Marketing section */}
+                <div className="py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">
+                    Marketing
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="promotions" className="text-sm font-medium">
+                        Promotional Emails
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Platform news, tips, and promotional opportunities
+                      </p>
+                    </div>
+                    <Switch
+                      id="promotions"
+                      checked={notifications.promotions}
+                      onCheckedChange={(v: boolean) =>
+                        setNotification("promotions", v)
+                      }
+                    />
+                  </div>
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex items-center gap-3">
                 <Button type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Save Preferences"}
                 </Button>
+                {savedTab === "notifications" && (
+                  <span className="flex items-center gap-1.5 text-sm text-green-600">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Saved
+                  </span>
+                )}
               </CardFooter>
             </Card>
           </form>
         </TabsContent>
 
+        {/* Security / Password Tab */}
         <TabsContent value="security">
           <form onSubmit={handleSaveSecurity}>
             <Card>
               <CardHeader>
                 <CardTitle>Security Settings</CardTitle>
                 <CardDescription>
-                  Manage your password and 2FA settings.
+                  Manage your password and two-factor authentication.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="current-password">Current Password</Label>
                   <Input
@@ -320,6 +491,7 @@ export default function SettingsClient() {
                       setNewPassword(e.target.value)
                     }
                   />
+                  <PasswordStrengthBar password={newPassword} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirm New Password</Label>
@@ -331,9 +503,22 @@ export default function SettingsClient() {
                       setConfirmPassword(e.target.value)
                     }
                   />
+                  {confirmPassword && newPassword !== confirmPassword && (
+                    <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                  )}
                 </div>
+
+                <Separator />
+
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="2fa">Enable Two-Factor Authentication</Label>
+                  <div>
+                    <Label htmlFor="2fa" className="text-sm font-medium">
+                      Two-Factor Authentication
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Add an extra layer of security to your account
+                    </p>
+                  </div>
                   <Switch
                     id="2fa"
                     checked={twoFactorEnabled}
@@ -341,36 +526,51 @@ export default function SettingsClient() {
                   />
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex items-center gap-3">
                 <Button type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Update Security Settings"}
                 </Button>
+                {savedTab === "security" && (
+                  <span className="flex items-center gap-1.5 text-sm text-green-600">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Saved
+                  </span>
+                )}
               </CardFooter>
             </Card>
           </form>
         </TabsContent>
 
+        {/* Billing / Payment Tab */}
         <TabsContent value="billing">
           <form onSubmit={handleSaveBilling}>
             <Card>
               <CardHeader>
                 <CardTitle>Billing Information</CardTitle>
                 <CardDescription>
-                  Manage your billing details and view your plan.
+                  Manage your billing details and view your current plan.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Current Plan</h3>
-                  <p>{data?.plan ? data.plan : "No active plan"}</p>
+              <CardContent className="space-y-5">
+                <div className="rounded-lg border bg-gray-50 p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Current Plan</p>
+                    <p className="font-semibold text-gray-900">
+                      {data?.plan ? data.plan : "No active plan"}
+                    </p>
+                  </div>
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Payment Method</h3>
-                  <p>
-                    {data?.paymentMethod
-                      ? data.paymentMethod
-                      : "No payment method on file"}
-                  </p>
+                <div className="rounded-lg border bg-gray-50 p-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-0.5">Payment Method</p>
+                    <p className="font-semibold text-gray-900">
+                      {data?.paymentMethod
+                        ? data.paymentMethod
+                        : "No payment method on file"}
+                    </p>
+                  </div>
+                  <CreditCard className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="billing-email">Billing Email</Label>
@@ -384,10 +584,16 @@ export default function SettingsClient() {
                   />
                 </div>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="flex items-center gap-3">
                 <Button type="submit" disabled={saving}>
                   {saving ? "Saving…" : "Update Billing Info"}
                 </Button>
+                {savedTab === "billing" && (
+                  <span className="flex items-center gap-1.5 text-sm text-green-600">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Saved
+                  </span>
+                )}
               </CardFooter>
             </Card>
           </form>

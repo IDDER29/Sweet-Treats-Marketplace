@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CreditCard, Banknote, Loader2 } from "lucide-react";
+import { CreditCard, Banknote, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useCart } from "@/context/CartContext";
 import { formatCurrency } from "@/lib/currency";
@@ -34,6 +36,9 @@ export default function CheckoutPage() {
     name: "",
     address: "",
     city: "",
+    state: "",
+    zip: "",
+    country: "",
     phone: "",
     instructions: "",
   });
@@ -107,13 +112,41 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+      {/* Step indicator */}
+      <nav aria-label="Checkout steps" className="mb-8">
+        <ol className="flex items-center justify-center gap-2 text-sm">
+          <li className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500 text-white text-xs">
+              <CheckCircle2 className="h-4 w-4" />
+            </span>
+            <span className="text-muted-foreground">Cart</span>
+          </li>
+          <li className="h-px w-8 bg-amber-400" />
+          <li className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-white text-xs font-bold">2</span>
+            <span className="font-semibold text-amber-600">Shipping</span>
+          </li>
+          <li className="h-px w-8 bg-muted-foreground/30" />
+          <li className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs font-bold">3</span>
+            <span className="text-muted-foreground">Payment</span>
+          </li>
+        </ol>
+      </nav>
+
+      <h1 className="text-2xl md:text-3xl font-bold mb-8">Checkout</h1>
+
       <form onSubmit={handleSubmit} className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          {/* Shipping Information */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Section 1 — Shipping Information */}
           <Card>
-            <CardHeader>
-              <CardTitle>Shipping Information</CardTitle>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white text-sm font-bold flex-shrink-0">
+                  1
+                </span>
+                Shipping Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
@@ -121,30 +154,68 @@ export default function CheckoutPage() {
                 <Input
                   id="name"
                   name="name"
+                  placeholder="Jane Smith"
                   value={shippingInfo.name}
                   onChange={handleShippingInfoChange}
                   required
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="address">Street Address</Label>
                 <Textarea
                   id="address"
                   name="address"
+                  placeholder="123 Maple Street, Apt 4B"
                   value={shippingInfo.address}
                   onChange={handleShippingInfoChange}
                   required
+                  rows={2}
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  value={shippingInfo.city}
-                  onChange={handleShippingInfoChange}
-                  required
-                />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    name="city"
+                    placeholder="New York"
+                    value={shippingInfo.city}
+                    onChange={handleShippingInfoChange}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="state">State / Province</Label>
+                  <Input
+                    id="state"
+                    name="state"
+                    placeholder="NY"
+                    value={shippingInfo.state}
+                    onChange={handleShippingInfoChange}
+                  />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="zip">ZIP / Postal Code</Label>
+                  <Input
+                    id="zip"
+                    name="zip"
+                    placeholder="10001"
+                    value={shippingInfo.zip}
+                    onChange={handleShippingInfoChange}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    name="country"
+                    placeholder="United States"
+                    value={shippingInfo.country}
+                    onChange={handleShippingInfoChange}
+                  />
+                </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="phone">Phone Number</Label>
@@ -152,6 +223,7 @@ export default function CheckoutPage() {
                   id="phone"
                   name="phone"
                   type="tel"
+                  placeholder="+1 (555) 000-0000"
                   value={shippingInfo.phone}
                   onChange={handleShippingInfoChange}
                   required
@@ -159,103 +231,147 @@ export default function CheckoutPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="instructions">
-                  Delivery Instructions (Optional)
+                  Delivery Instructions{" "}
+                  <span className="text-muted-foreground font-normal">(Optional)</span>
                 </Label>
                 <Textarea
                   id="instructions"
                   name="instructions"
+                  placeholder="Leave at the door, ring doorbell twice…"
                   value={shippingInfo.instructions}
                   onChange={handleShippingInfoChange}
+                  rows={2}
                 />
               </div>
             </CardContent>
           </Card>
 
-          {/* Payment method. No raw card fields are collected here — online
-              card payments go through a PCI-compliant provider (Stripe) as a
-              hosted checkout/redirect, which is the documented next step. */}
+          {/* Section 2 — Payment Method */}
+          {/* No raw card fields are collected here — online card payments go
+              through a PCI-compliant provider (Stripe) as a hosted checkout/redirect,
+              which is the documented next step. */}
           <Card>
-            <CardHeader>
-              <CardTitle>Payment Method</CardTitle>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-white text-sm font-bold flex-shrink-0">
+                  2
+                </span>
+                Payment Method
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <RadioGroup
                 value={paymentMethod}
                 onValueChange={setPaymentMethod}
-                className="space-y-4"
+                className="space-y-3"
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cod" id="cod" />
-                  <Label
-                    htmlFor="cod"
-                    className="flex items-center space-x-2"
-                  >
-                    <Banknote className="h-4 w-4" />
-                    <span>Cash on Delivery</span>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 opacity-60">
-                  <RadioGroupItem value="card" id="card" disabled />
-                  <Label
-                    htmlFor="card"
-                    className="flex items-center space-x-2"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    <span>Pay by card online (coming soon)</span>
-                  </Label>
-                </div>
+                {/* Cash on Delivery option */}
+                <label
+                  htmlFor="cod"
+                  className={`flex items-start gap-4 rounded-xl border-2 p-4 cursor-pointer transition-colors ${
+                    paymentMethod === "cod"
+                      ? "border-green-500 bg-green-50"
+                      : "border-muted hover:border-muted-foreground/40"
+                  }`}
+                >
+                  <RadioGroupItem value="cod" id="cod" className="mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Banknote className="h-4 w-4 text-green-700" />
+                      <span className="font-semibold text-sm">Cash on Delivery</span>
+                      <Badge className="bg-green-100 text-green-800 hover:bg-green-100 text-xs">
+                        Available now
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Pay with cash when your order arrives. No card needed — just have
+                      the exact amount ready for the driver.
+                    </p>
+                  </div>
+                </label>
+
+                {/* Card online option — coming soon */}
+                <label
+                  htmlFor="card"
+                  className="flex items-start gap-4 rounded-xl border-2 border-muted p-4 opacity-50 cursor-not-allowed"
+                >
+                  <RadioGroupItem value="card" id="card" disabled className="mt-0.5" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CreditCard className="h-4 w-4" />
+                      <span className="font-semibold text-sm">Pay by card online</span>
+                      <Badge variant="secondary" className="text-xs">Coming soon</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Secure card payments via our payment provider. We never store your
+                      card details.
+                    </p>
+                  </div>
+                </label>
               </RadioGroup>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Online card payments will be processed securely by our payment
-                provider. We never store your card details.
-              </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Order Summary */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
+        {/* Order Summary — sticky on desktop */}
+        <div className="lg:self-start lg:sticky lg:top-24">
+          <Card className="border-2 border-amber-100">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">Order Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {cart.map((item) => (
-                <div key={item.id} className="flex justify-between">
-                  <span>
-                    {(item.name ?? "Product")} x {item.quantity}
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {item.name ?? "Product"}{" "}
+                    <span className="font-medium text-foreground">× {item.quantity}</span>
                   </span>
-                  <span>
+                  <span className="font-medium">
                     {formatCurrency((item.price ?? 0) * item.quantity)}
                   </span>
                 </div>
               ))}
-              <div className="border-t pt-4 space-y-2">
+              <Separator />
+              <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span>Subtotal</span>
+                  <span className="text-muted-foreground">Subtotal</span>
                   <span>{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Delivery Fee</span>
+                  <span className="text-muted-foreground">Delivery Fee</span>
                   <span>{formatCurrency(deliveryFee)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Tax</span>
+                  <span className="text-muted-foreground">Tax</span>
                   <span>{formatCurrency(tax)}</span>
                 </div>
               </div>
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>{formatCurrency(total)}</span>
+              <Separator />
+              <div className="flex justify-between items-baseline pt-1">
+                <span className="font-bold text-lg">Total</span>
+                <span className="font-extrabold text-2xl text-amber-700">
+                  {formatCurrency(total)}
+                </span>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full" disabled={submitting}>
+            <CardFooter className="flex flex-col gap-2 pt-0">
+              <Button
+                type="submit"
+                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold h-12 text-base"
+                disabled={submitting}
+              >
                 {submitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {submitting ? "Placing order…" : "Place Order"}
               </Button>
+              <p className="text-xs text-muted-foreground text-center leading-relaxed pt-1">
+                By placing your order, you agree to our{" "}
+                <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
+                  Terms of Service
+                </Link>
+                .
+              </p>
             </CardFooter>
           </Card>
         </div>
