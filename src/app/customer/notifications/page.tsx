@@ -50,50 +50,7 @@ interface NotificationPreference {
   channels: PreferenceChannel;
 }
 
-// ─── Mock data ───────────────────────────────────────────────────────────────
-
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    type: "delivery",
-    title: "Your order is out for delivery!",
-    message: "Order #1234 is on its way — your driver is 10 minutes away.",
-    timestamp: "2 hours ago",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "order",
-    title: "New treats from your favourite bakery",
-    message: "Amira's Cakes just added 5 new seasonal items to their menu.",
-    timestamp: "5 hours ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "review",
-    title: "Your review was published",
-    message: "Your 5-star review for Chocolate Lava Cake is now live.",
-    timestamp: "Yesterday",
-    read: true,
-  },
-  {
-    id: "4",
-    type: "deal",
-    title: "Flash deal: 20% off at Amira's Cakes",
-    message: "Today only — use code SWEET20 at checkout. Ends at midnight.",
-    timestamp: "Yesterday",
-    read: true,
-  },
-  {
-    id: "5",
-    type: "order",
-    title: "Order #1230 delivered",
-    message: "Your order was successfully delivered. Enjoy your treats!",
-    timestamp: "3 days ago",
-    read: true,
-  },
-];
+// ─── Default preferences ─────────────────────────────────────────────────────
 
 const INITIAL_PREFERENCES: NotificationPreference[] = [
   {
@@ -268,7 +225,7 @@ function ChannelToggle({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [preferences, setPreferences] = useState<NotificationPreference[]>(INITIAL_PREFERENCES);
 
   const unreadCount = notifications.filter((n) => !n.read).length;

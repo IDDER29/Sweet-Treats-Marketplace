@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   CheckCircle2,
   Circle,
   MapPin,
-  Store,
   CreditCard,
   HelpCircle,
 } from "lucide-react";
@@ -17,74 +17,90 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/currency";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { getOrderById } from "@/services/orders";
+import type { OrderStatus } from "@/types";
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
-type OrderStatus =
-  | "Pending"
-  | "Confirmed"
-  | "In Preparation"
-  | "Out for Delivery"
-  | "Delivered"
-  | "Cancelled";
+const STATUS_DISPLAY: Record<OrderStatus, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  preparing: "Preparing",
+  out_for_delivery: "Out for Delivery",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
 
 const STATUS_BADGE: Record<OrderStatus, string> = {
-  Pending: "bg-gray-100 text-gray-700",
-  Confirmed: "bg-blue-100 text-blue-700",
-  "In Preparation": "bg-amber-100 text-amber-700",
-  "Out for Delivery": "bg-orange-100 text-orange-700",
-  Delivered: "bg-green-100 text-green-700",
-  Cancelled: "bg-red-100 text-red-700",
+  pending: "bg-gray-100 text-gray-700",
+  confirmed: "bg-blue-100 text-blue-700",
+  preparing: "bg-amber-100 text-amber-700",
+  out_for_delivery: "bg-orange-100 text-orange-700",
+  delivered: "bg-green-100 text-green-700",
+  cancelled: "bg-red-100 text-red-700",
 };
 
 const TIMELINE_STEPS: { label: string; status: OrderStatus }[] = [
-  { label: "Placed", status: "Pending" },
-  { label: "Confirmed", status: "Confirmed" },
-  { label: "Preparing", status: "In Preparation" },
-  { label: "Out for Delivery", status: "Out for Delivery" },
-  { label: "Delivered", status: "Delivered" },
+  { label: "Placed", status: "pending" },
+  { label: "Confirmed", status: "confirmed" },
+  { label: "Preparing", status: "preparing" },
+  { label: "Out for Delivery", status: "out_for_delivery" },
+  { label: "Delivered", status: "delivered" },
 ];
 
 const STATUS_ORDER: OrderStatus[] = [
-  "Pending",
-  "Confirmed",
-  "In Preparation",
-  "Out for Delivery",
-  "Delivered",
+  "pending",
+  "confirmed",
+  "preparing",
+  "out_for_delivery",
+  "delivered",
 ];
 
 function statusIndex(s: OrderStatus) {
   return STATUS_ORDER.indexOf(s);
 }
 
-// ── Mock data ─────────────────────────────────────────────────────────────────
-
-const MOCK_STATUS: OrderStatus = "In Preparation";
-const PLACED_DATE = new Date(Date.now() - 40 * 60 * 1000); // 40 min ago
-
-const LINE_ITEMS = [
-  { name: "Chocolate Lava Cake", qty: 2, unitPrice: 8.5 },
-  { name: "Salted Caramel Éclair", qty: 1, unitPrice: 5.0 },
-  { name: "Raspberry Macaron Box (6)", qty: 1, unitPrice: 12.0 },
-];
-
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CustomerOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const orderId = `#ORD-${id}`;
-  const status: OrderStatus = MOCK_STATUS;
 
-  const subtotal = LINE_ITEMS.reduce((s, i) => s + i.qty * i.unitPrice, 0);
-  const deliveryFee = 2.5;
-  const discount = 2.0;
-  const total = subtotal + deliveryFee - discount;
+  const {
+    data: order,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["order", id],
+    queryFn: () => getOrderById(id),
+    enabled: !!id,
+  });
 
-  const currentStep = statusIndex(status);
-  const isCancelled = status === "Cancelled";
-  const canCancel = status === "Pending" || status === "Confirmed";
-  // 40 min old — past the 30-min window
-  const pastCancellationWindow = Date.now() - PLACED_DATE.getTime() > 30 * 60 * 1000;
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <LoadingState rows={4} />
+      </div>
+    );
+  }
+
+  if (isError || !order) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <ErrorState onRetry={refetch} />
+      </div>
+    );
+  }
+
+  const isCancelled = order.status === "cancelled";
+  const currentStep = isCancelled ? -1 : statusIndex(order.status);
+  const canCancel = order.status === "pending" || order.status === "confirmed";
+  const orderLabel = order.number ?? order.id;
+  const estimatedDelivery = order.estimatedDeliveryAt
+    ? new Date(order.estimatedDeliveryAt).toLocaleString()
+    : null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -105,10 +121,12 @@ export default function CustomerOrderDetailPage() {
 
       {/* Title row */}
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold">Order {orderId}</h1>
-        <Badge className={`${STATUS_BADGE[status]} border-0`}>{status}</Badge>
+        <h1 className="text-2xl font-bold">Order #{orderLabel}</h1>
+        <Badge className={`${STATUS_BADGE[order.status]} border-0`}>
+          {STATUS_DISPLAY[order.status]}
+        </Badge>
         <span className="text-sm text-muted-foreground ml-auto">
-          Placed {PLACED_DATE.toLocaleString()}
+          Placed {new Date(order.createdAt).toLocaleString()}
         </span>
       </div>
 
@@ -122,16 +140,16 @@ export default function CustomerOrderDetailPage() {
               <CardTitle className="text-base">Items Ordered</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {LINE_ITEMS.map((item) => (
-                <div key={item.name} className="flex items-center justify-between text-sm">
+              {order.items.map((item) => (
+                <div key={item.productId} className="flex items-center justify-between text-sm">
                   <div>
                     <p className="font-medium">{item.name}</p>
                     <p className="text-muted-foreground">
-                      {item.qty} × {formatCurrency(item.unitPrice)}
+                      {item.quantity} × {formatCurrency(item.price)}
                     </p>
                   </div>
                   <span className="font-semibold">
-                    {formatCurrency(item.qty * item.unitPrice)}
+                    {formatCurrency(item.quantity * item.price)}
                   </span>
                 </div>
               ))}
@@ -173,7 +191,9 @@ export default function CustomerOrderDetailPage() {
                           {!isLast && (
                             <div
                               className={`w-px my-1 min-h-[1.5rem] flex-1 ${
-                                done && i < currentStep ? "bg-green-400" : "border-l-2 border-dashed border-muted-foreground/20"
+                                done && i < currentStep
+                                  ? "bg-green-400"
+                                  : "border-l-2 border-dashed border-muted-foreground/20"
                               }`}
                             />
                           )}
@@ -181,7 +201,11 @@ export default function CustomerOrderDetailPage() {
                         <div className={`pb-5 ${isLast ? "pb-0" : ""}`}>
                           <p
                             className={`text-sm font-semibold mt-1 ${
-                              isCurrent ? "text-amber-700" : done ? "text-foreground" : "text-muted-foreground"
+                              isCurrent
+                                ? "text-amber-700"
+                                : done
+                                ? "text-foreground"
+                                : "text-muted-foreground"
                             }`}
                           >
                             {step.label}
@@ -199,24 +223,6 @@ export default function CustomerOrderDetailPage() {
               )}
             </CardContent>
           </Card>
-
-          {/* Store info */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Store</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-700 font-bold text-sm flex-shrink-0">
-                CH
-              </div>
-              <div>
-                <p className="font-medium">Cake Heaven</p>
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Store className="h-3.5 w-3.5" /> Sweet treats &amp; pastries
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* ── Right column (1/3) ── */}
@@ -229,20 +235,22 @@ export default function CustomerOrderDetailPage() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
+                <span>{formatCurrency(order.subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Delivery fee</span>
-                <span>{formatCurrency(deliveryFee)}</span>
+                <span>{formatCurrency(order.deliveryFee)}</span>
               </div>
-              <div className="flex justify-between text-green-600">
-                <span>Discount</span>
-                <span>−{formatCurrency(discount)}</span>
-              </div>
+              {order.tax > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax</span>
+                  <span>{formatCurrency(order.tax)}</span>
+                </div>
+              )}
               <Separator />
               <div className="flex justify-between font-semibold text-base">
                 <span>Total</span>
-                <span>{formatCurrency(total)}</span>
+                <span>{formatCurrency(order.total)}</span>
               </div>
             </CardContent>
           </Card>
@@ -255,9 +263,31 @@ export default function CustomerOrderDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground space-y-0.5">
-              <p className="font-medium text-foreground">Sarah Johnson</p>
-              <p>42 Maple Street, Apt 3B</p>
-              <p>San Francisco, CA 94102</p>
+              {order.shippingAddress ? (
+                <>
+                  {order.shippingAddress.fullName && (
+                    <p className="font-medium text-foreground">
+                      {order.shippingAddress.fullName}
+                    </p>
+                  )}
+                  <p>{order.shippingAddress.line1}</p>
+                  {order.shippingAddress.line2 && <p>{order.shippingAddress.line2}</p>}
+                  <p>
+                    {[
+                      order.shippingAddress.city,
+                      order.shippingAddress.state,
+                      order.shippingAddress.postalCode,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                  {order.shippingAddress.country && (
+                    <p>{order.shippingAddress.country}</p>
+                  )}
+                </>
+              ) : (
+                <p className="italic">No delivery address</p>
+              )}
             </CardContent>
           </Card>
 
@@ -269,33 +299,29 @@ export default function CustomerOrderDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
-              <p>Visa ••••4242</p>
-              <p className="text-muted-foreground mt-0.5">
-                Estimated delivery: Today, 2:30 – 3:00 PM
-              </p>
+              <p>{order.paymentMethod ?? "N/A"}</p>
+              {estimatedDelivery && (
+                <p className="text-muted-foreground mt-0.5">
+                  Estimated delivery: {estimatedDelivery}
+                </p>
+              )}
             </CardContent>
           </Card>
 
           {/* CTA buttons */}
           <div className="flex flex-col gap-2">
             <Button asChild className="bg-amber-600 hover:bg-amber-700 text-white">
-              <Link href={`/order-tracking?order=${id}`}>Track order</Link>
+              <Link href={`/order-tracking?orderId=${order.id}`}>Track order</Link>
             </Button>
 
-            {status === "Delivered" && (
+            {order.status === "delivered" && (
               <Button asChild variant="outline">
                 <Link href="/review-and-feedback">Leave a review</Link>
               </Button>
             )}
 
             {canCancel && (
-              <Button
-                variant="destructive"
-                disabled={pastCancellationWindow}
-                title={pastCancellationWindow ? "Past cancellation window" : undefined}
-              >
-                Cancel order
-              </Button>
+              <Button variant="destructive">Cancel order</Button>
             )}
           </div>
         </div>

@@ -43,37 +43,6 @@ interface Promotion {
 }
 
 // ---------------------------------------------------------------------------
-// Mock data
-// ---------------------------------------------------------------------------
-
-const INITIAL_PROMOS: Promotion[] = [
-  {
-    id: 1,
-    name: "Summer Launch Special",
-    code: "SUMMER20",
-    type: "percentage",
-    value: 20,
-    minOrder: 25,
-    maxUses: 100,
-    uses: 42,
-    expiry: "2026-08-31",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Loyalty Reward",
-    code: "LOYAL5",
-    type: "fixed",
-    value: 5,
-    minOrder: null,
-    maxUses: null,
-    uses: 89,
-    expiry: "2026-06-28",
-    status: "expired",
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -125,7 +94,7 @@ const EMPTY_FORM = {
 // ---------------------------------------------------------------------------
 
 export default function PromotionsPage() {
-  const [promos, setPromos] = useState<Promotion[]>(INITIAL_PROMOS);
+  const [promos, setPromos] = useState<Promotion[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 

@@ -8,7 +8,7 @@
 //   GET  /orders/:id    -> Order        (single order, used by tracking)
 
 import { getServerApi } from "@/lib/api-client";
-import type { Address, Order, OrderItem } from "@/types";
+import type { Address, Order, OrderItem, OrderStatus } from "@/types";
 
 export interface CreateOrderInput {
   items: OrderItem[];
@@ -32,5 +32,11 @@ export async function getMyOrders(): Promise<Order[]> {
 export async function getOrderById(id: string): Promise<Order> {
   const api = await getServerApi();
   const { data } = await api.get<Order>(`/orders/${id}`);
+  return data;
+}
+
+export async function updateOrderStatus(id: string, status: OrderStatus): Promise<Order> {
+  const api = await getServerApi();
+  const { data } = await api.patch<Order>(`/orders/${id}/status`, { status });
   return data;
 }

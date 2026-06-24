@@ -30,31 +30,12 @@ import { LoadingState } from "@/components/feedback/LoadingState";
 import { EmptyState } from "@/components/feedback/EmptyState";
 import { ErrorState } from "@/components/feedback/ErrorState";
 import DashboardShell from "@/components/business/dashboard/DashboardShell";
-import { getServerApi } from "@/lib/api-client";
+import {
+  getBusinessReviews,
+  replyToBusinessReview,
+  type StoreReview,
+} from "@/services/reviews";
 import { toast } from "react-toastify";
-
-interface StoreReview {
-  id: string;
-  productId: string;
-  productName: string;
-  productImage?: string;
-  author: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  reply?: string;
-  repliedAt?: string;
-}
-
-async function getStoreReviews(): Promise<StoreReview[]> {
-  // TODO(backend): GET /business/reviews — returns all reviews for the seller's store
-  return [];
-}
-
-async function replyToReview(reviewId: string, reply: string): Promise<void> {
-  const api = await getServerApi();
-  await api.post(`/business/reviews/${reviewId}/reply`, { reply });
-}
 
 function StarRow({ rating, size = "sm" }: { rating: number; size?: "sm" | "md" }) {
   const sz = size === "md" ? "h-4 w-4" : "h-3.5 w-3.5";
@@ -114,7 +95,7 @@ function ReviewCard({ review }: { review: StoreReview }) {
   const [draft, setDraft] = useState(review.reply ?? "");
 
   const mutation = useMutation({
-    mutationFn: () => replyToReview(review.id, draft),
+    mutationFn: () => replyToBusinessReview(review.id, draft),
     onSuccess: () => {
       toast.success("Reply posted.");
       setOpen(false);
@@ -225,7 +206,7 @@ export default function ReviewsDashboardPage() {
 
   const { data: reviews = [], isLoading, isError, refetch } = useQuery<StoreReview[]>({
     queryKey: ["store-reviews"],
-    queryFn: getStoreReviews,
+    queryFn: getBusinessReviews,
   });
 
   const filtered = reviews.filter((r) => {
