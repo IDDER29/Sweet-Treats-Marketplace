@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   BarChart,
   Truck,
@@ -10,70 +10,71 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Link from "next/link";
+import { APP_CONFIG } from "@/config";
 
-const Sidebar = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+interface DashboardSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const NAV_ITEMS = [
+  { href: "/business/dashboard", icon: Home, label: "Dashboard" },
+  { href: "/business/dashboard/sales", icon: BarChart, label: "Sales" },
+  { href: "/business/dashboard/delivery", icon: Truck, label: "Delivery" },
+  { href: "/business/dashboard/products", icon: Package, label: "Products" },
+  { href: "/business/dashboard/orders", icon: ShoppingBag, label: "Orders" },
+  { href: "/business/settings", icon: Settings, label: "Settings" },
+];
+
+const Sidebar = ({ isOpen = false, onClose = () => {} }: DashboardSidebarProps) => {
   return (
-    <aside
-      className={`${
-        sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
-    >
-      <div className="flex items-center justify-between p-4">
-        <h1 className="text-2xl font-bold">Sweet Delights</h1>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarOpen(false)}
-          className="lg:hidden"
-        >
-          <X className="h-6 w-6" />
-        </Button>
-      </div>
-      <ScrollArea className="flex-grow">
-        <nav className="space-y-2 p-4">
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/dashboard">
-              <Home className="mr-2 h-4 w-4" />
-              Dashboard
-            </Link>
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside
+        className={`${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gray-900 text-white transition-transform duration-300 ease-in-out lg:static lg:translate-x-0`}
+      >
+        <div className="flex items-center justify-between border-b border-white/10 p-4">
+          <Link href="/" className="text-lg font-bold text-white">
+            {APP_CONFIG.name.replace(" Marketplace", "")}
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="text-white hover:bg-white/10 lg:hidden"
+          >
+            <X className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/dashboard/sales">
-              <BarChart className="mr-2 h-4 w-4" />
-              Sales
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/dashboard/delivery">
-              <Truck className="mr-2 h-4 w-4" />
-              Delivery
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/dashboard/products">
-              <Package className="mr-2 h-4 w-4" />
-              Products
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/dashboard/orders">
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Orders
-            </Link>
-          </Button>
-          <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/business/settings">
-              <Settings className="mr-2 h-4 w-4" />
-              Settings
-            </Link>
-          </Button>
-        </nav>
-      </ScrollArea>
-    </aside>
+        </div>
+        <ScrollArea className="flex-1 px-3 py-4">
+          <nav className="space-y-1">
+            {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
+              <Button
+                key={href}
+                variant="ghost"
+                className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
+                asChild
+              >
+                <Link href={href}>
+                  <Icon className="mr-3 h-4 w-4" />
+                  {label}
+                </Link>
+              </Button>
+            ))}
+          </nav>
+        </ScrollArea>
+      </aside>
+    </>
   );
 };
 

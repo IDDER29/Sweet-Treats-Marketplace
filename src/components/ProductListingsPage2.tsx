@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { formatCurrency } from "@/lib/currency";
 import { toast } from "react-toastify";
+import { PRODUCT_CATEGORIES, DIETARY_LABELS } from "@/config";
 
 interface ProductImage {
   url: string;
@@ -42,10 +43,9 @@ interface Product {
   images: ProductImage[];
 }
 
-interface DietaryPreferences {
-  "gluten-free": boolean;
-  vegan: boolean;
-}
+type DietaryKey = "Gluten-Free" | "Vegan";
+
+const DIETARY_FILTER: DietaryKey[] = ["Gluten-Free", "Vegan"];
 
 const PRODUCTS_PER_PAGE = 6;
 const INITIAL_PRICE_RANGE = [0, 50] as [number, number];
@@ -58,11 +58,9 @@ const ProductListingsPage: React.FC = () => {
   const [priceRange, setPriceRange] =
     useState<[number, number]>(INITIAL_PRICE_RANGE);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [dietaryPreferences, setDietaryPreferences] =
-    useState<DietaryPreferences>({
-      "gluten-free": false,
-      vegan: false,
-    });
+  const [dietaryFilters, setDietaryFilters] = useState<Set<DietaryKey>>(
+    new Set()
+  );
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [products, setProducts] = useState<Product[]>([]);
 
@@ -82,7 +80,7 @@ const ProductListingsPage: React.FC = () => {
   // on a now-empty page.
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, priceRange, dietaryPreferences]);
+  }, [searchTerm, selectedCategory, priceRange, dietaryFilters]);
 
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -93,10 +91,12 @@ const ProductListingsPage: React.FC = () => {
     const matchesCategory =
       selectedCategory === "All" || product.category === selectedCategory;
     const matchesDietary =
-      (!dietaryPreferences["gluten-free"] && !dietaryPreferences["vegan"]) ||
-      (dietaryPreferences["gluten-free"] &&
-        product.dietary.includes("gluten-free")) ||
-      (dietaryPreferences["vegan"] && product.dietary.includes("vegan"));
+      dietaryFilters.size === 0 ||
+      [...dietaryFilters].some((label) =>
+        product.dietary.some(
+          (d) => d.toLowerCase() === label.toLowerCase()
+        )
+      );
 
     return (
       matchesSearch && matchesPriceRange && matchesCategory && matchesDietary
@@ -133,33 +133,36 @@ const ProductListingsPage: React.FC = () => {
 
       {/* Search and Filter Bar */}
       <div className="mb-8 space-y-4">
-        <div className="flex items-center space-x-2">
-          <Search className="w-5 h-5 text-gray-400" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="Search for your favorite treat"
+            placeholder="Search for your favourite treat…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-grow"
+            className="pl-9"
           />
         </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-44">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="All">All Categories</SelectItem>
-              <SelectItem value="Cakes">Cakes</SelectItem>
-              <SelectItem value="Pastries">Pastries</SelectItem>
-              <SelectItem value="Candies">Candies</SelectItem>
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium">
-              Price Range: ${priceRange[0]} - ${priceRange[1]}
+          <div className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground">
+              Price: {formatCurrency(priceRange[0])} –{" "}
+              {formatCurrency(priceRange[1])}
             </span>
             <Slider
               min={0}
@@ -167,35 +170,27 @@ const ProductListingsPage: React.FC = () => {
               step={1}
               value={priceRange}
               onValueChange={(value) => setPriceRange([value[0], value[1]])}
-              className="w-[200px]"
+              className="w-48"
             />
           </div>
 
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center space-x-2">
-              <Checkbox
-                checked={dietaryPreferences["gluten-free"]}
-                onCheckedChange={(checked) =>
-                  setDietaryPreferences((prev) => ({
-                    ...prev,
-                    "gluten-free": !!checked,
-                  }))
-                }
-              />
-              <span>Gluten-free</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <Checkbox
-                checked={dietaryPreferences.vegan}
-                onCheckedChange={(checked) =>
-                  setDietaryPreferences((prev) => ({
-                    ...prev,
-                    vegan: !!checked,
-                  }))
-                }
-              />
-              <span>Vegan</span>
-            </label>
+          <div className="flex flex-wrap items-center gap-3">
+            {DIETARY_FILTER.map((label) => (
+              <label key={label} className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={dietaryFilters.has(label)}
+                  onCheckedChange={(checked) =>
+                    setDietaryFilters((prev) => {
+                      const next = new Set(prev);
+                      if (checked) next.add(label);
+                      else next.delete(label);
+                      return next;
+                    })
+                  }
+                />
+                {label}
+              </label>
+            ))}
           </div>
         </div>
       </div>

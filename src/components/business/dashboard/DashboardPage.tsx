@@ -77,6 +77,7 @@ function MetricCard({
 
 export default function DashboardPage() {
   const [search, setSearch] = useState<string>("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["dashboard-summary"],
@@ -96,14 +97,19 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <DashboardSidbar />
+      <DashboardSidbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       {/* Main content */}
       <main className="flex-1 overflow-y-auto bg-gray-100">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="icon" className="lg:hidden">
+              <Button
+                variant="outline"
+                size="icon"
+                className="lg:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
                 <Menu className="h-6 w-6" />
               </Button>
               <Input

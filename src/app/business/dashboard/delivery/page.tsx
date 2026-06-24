@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, Truck, Package, CheckCircle } from "lucide-react";
+import { MapPin, Truck, Package, CheckCircle, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import DashboardSidbar from "@/components/business/dashboard/DashboardSidbar";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { ErrorState } from "@/components/feedback/ErrorState";
@@ -45,6 +46,7 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 export default function DeliveryPage() {
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<string>("all");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } = useQuery<DeliverySummary>({
     queryKey: ["delivery-summary"],
@@ -69,10 +71,16 @@ export default function DeliveryPage() {
   }, [data?.active, search, status]);
 
   return (
-    <div className="w-full flex">
-      <DashboardSidbar />
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Delivery Management</h1>
+    <div className="w-full flex h-screen overflow-hidden">
+      <DashboardSidbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="container mx-auto px-4 py-8">
+        <div className="mb-6 flex items-center gap-4">
+          <Button variant="outline" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          <h1 className="text-3xl font-bold">Delivery Management</h1>
+        </div>
 
         {isLoading && <LoadingState rows={4} />}
 
@@ -222,6 +230,7 @@ export default function DeliveryPage() {
             )}
           </>
         )}
+        </div>
       </main>
     </div>
   );

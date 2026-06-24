@@ -1,20 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { getProductById } from "@/utils/api";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { EmptyState } from "@/components/feedback/EmptyState";
 import ProductImageGallery from "./products-deties/ProductImageGallery";
 import ProductInformation from "./products-deties/ProductInformation";
 import ReviewsSection from "./products-deties/ReviewsSection";
@@ -128,9 +119,24 @@ export default function ProductDetailsPage({ id }: { id?: string }) {
   // States for zoom effect and review form
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState rows={6} />
+      </div>
+    );
 
-  if (!product) return <p>Product not found.</p>;
+  if (!product)
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <EmptyState
+          title="Product not found"
+          message="This product may no longer be available."
+          actionLabel="Browse products"
+          actionHref="/products"
+        />
+      </div>
+    );
 
   const handleSubmitReview = () => {
     if (newReview.comment.trim().length < 10) {

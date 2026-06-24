@@ -62,6 +62,7 @@ function formatDate(value?: string): string {
 export default function SalesPage() {
   const [search, setSearch] = useState<string>("");
   const [status, setStatus] = useState<string>("all");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const summaryQuery = useQuery<SalesSummary>({
     queryKey: ["sales-summary"],
@@ -92,9 +93,10 @@ export default function SalesPage() {
   }, [ordersQuery.data, search, status]);
 
   return (
-    <div className="w-full flex">
-      <DashboardSidbar />
-      <main className="container mx-auto px-4 py-8">
+    <div className="w-full flex h-screen overflow-hidden">
+      <DashboardSidbar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <main className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Sales Overview</h1>
 
         {summaryQuery.isLoading && <LoadingState rows={4} />}
@@ -292,6 +294,7 @@ export default function SalesPage() {
               </CardContent>
             </Card>
           )}
+        </div>
       </main>
     </div>
   );
