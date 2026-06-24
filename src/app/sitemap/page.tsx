@@ -38,6 +38,8 @@ const SECTIONS: SitemapSection[] = [
       { label: "Delivery Addresses", href: "/customer/addresses", description: "Saved addresses for faster checkout" },
       { label: "My Reviews", href: "/customer/reviews", description: "Reviews you've submitted" },
       { label: "Notifications", href: "/customer/notifications", description: "Notification centre and preferences" },
+      { label: "Payment Methods", href: "/customer/payment-methods", description: "Saved cards and billing" },
+      { label: "Rewards & Loyalty", href: "/customer/loyalty", description: "Points balance, tiers, and referrals" },
       { label: "Review & Feedback", href: "/review-and-feedback", description: "Leave a review for a delivered order" },
     ],
   },
@@ -66,8 +68,10 @@ const SECTIONS: SitemapSection[] = [
     color: "text-green-700 bg-green-100",
     links: [
       { label: "Driver Dashboard", href: "/delivery-provider/dashboard", description: "Active deliveries and requests" },
+      { label: "Active Deliveries", href: "/delivery-provider/orders", description: "Current and completed deliveries" },
       { label: "Earnings", href: "/delivery-provider/earnings", description: "Earnings history and payout info" },
       { label: "Driver Profile", href: "/delivery-provider/profile", description: "Personal details and vehicle info" },
+      { label: "Driver Settings", href: "/delivery-provider/settings", description: "Availability, zones, and preferences" },
     ],
   },
   {
@@ -87,7 +91,12 @@ const SECTIONS: SitemapSection[] = [
     links: [
       { label: "About Us", href: "/about", description: "Our story, mission, and values" },
       { label: "How It Works", href: "/how-it-works", description: "Step-by-step guide to ordering" },
+      { label: "Sell on Sweet Treats", href: "/sell", description: "Start your bakery store" },
+      { label: "Deliver with Us", href: "/drive", description: "Become a delivery driver" },
       { label: "Blog", href: "/blog", description: "Stories, tips, and bakery spotlights" },
+      { label: "Careers", href: "/careers", description: "Job openings at Sweet Treats" },
+      { label: "Press & Media", href: "/press", description: "Press coverage and brand assets" },
+      { label: "Help Center", href: "/help", description: "Support articles and answers" },
       { label: "Contact", href: "/contact", description: "Get in touch with our team" },
       { label: "FAQ", href: "/FAQ", description: "Frequently asked questions" },
     ],
@@ -100,6 +109,8 @@ const SECTIONS: SitemapSection[] = [
       { label: "Terms of Service", href: "/terms", description: "Rules and conditions of use" },
       { label: "Privacy Policy", href: "/privacy", description: "How we handle your data" },
       { label: "Refund Policy", href: "/refund-policy", description: "Returns, replacements, and refunds" },
+      { label: "Cookie Policy", href: "/cookie-policy", description: "Cookies and tracking preferences" },
+      { label: "Accessibility", href: "/accessibility", description: "WCAG 2.1 AA accessibility statement" },
     ],
   },
 ];
@@ -160,6 +171,8 @@ export default function SitemapPage() {
               { label: "Register", href: "/auth/register" },
               { label: "Forgot password", href: "/auth/forgot-password" },
               { label: "Reset password", href: "/auth/reset-password" },
+              { label: "Verify email", href: "/auth/verify-email" },
+              { label: "Unsubscribe from emails", href: "/newsletter/unsubscribe" },
             ].map(({ label, href }) => (
               <Link key={href} href={href} className="text-sm text-muted-foreground hover:text-amber-700 underline underline-offset-2">
                 {label}

@@ -99,6 +99,7 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
       { label: "About Us", href: "/about" },
       { label: "How It Works", href: "/how-it-works" },
       { label: "Sell on Sweet Treats", href: "/sell" },
+      { label: "Deliver with Us", href: "/drive" },
       { label: "Blog", href: "/blog" },
       { label: "Careers", href: "/careers" },
       { label: "Press", href: "/press" },
