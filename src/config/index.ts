@@ -89,6 +89,8 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
       { label: "Collections", href: "/collections" },
       { label: "Deals & Offers", href: "/deals" },
       { label: "Gift Guide", href: "/gift-guide" },
+      { label: "Gift Cards", href: "/gift-cards" },
+      { label: "Catering", href: "/catering" },
       { label: "Stores", href: "/stores" },
       { label: "Search", href: "/search" },
     ],
@@ -111,6 +113,7 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Help Center", href: "/help" },
       { label: "FAQ", href: "/FAQ" },
+      { label: "Affiliate Program", href: "/affiliate" },
       { label: "Refund Policy", href: "/refund-policy" },
       { label: "Accessibility", href: "/accessibility" },
       { label: "Cookie Policy", href: "/cookie-policy" },
