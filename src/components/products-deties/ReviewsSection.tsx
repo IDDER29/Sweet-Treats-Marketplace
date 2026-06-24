@@ -15,6 +15,7 @@ import { Star } from "lucide-react";
 import { toast } from "react-toastify";
 import { getProductReviews, createReview } from "@/services/reviews";
 import { LoadingState } from "@/components/feedback/LoadingState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 
 interface ProductReviewsProps {
   productId?: string;
@@ -25,7 +26,7 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({ productId }) => {
   const [open, setOpen] = useState(false);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
 
-  const { data: reviews = [], isLoading } = useQuery({
+  const { data: reviews = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["reviews", productId],
     queryFn: () => getProductReviews(productId as string),
     enabled: !!productId,
@@ -75,6 +76,8 @@ const ReviewsSection: React.FC<ProductReviewsProps> = ({ productId }) => {
 
       {isLoading ? (
         <LoadingState rows={2} />
+      ) : isError ? (
+        <ErrorState onRetry={refetch} />
       ) : reviews.length > 0 ? (
         <ul className="space-y-4">
           {reviews.map((review, index) => (

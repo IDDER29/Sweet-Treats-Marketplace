@@ -10,6 +10,7 @@ import { getAllProducts } from "@/utils/api";
 import { useCart } from "@/context/CartContext";
 import { formatCurrency } from "@/lib/currency";
 import { LoadingState } from "@/components/feedback/LoadingState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import type { Product } from "@/types";
 
 const DIETARY_BADGE_COLORS: Record<string, string> = {
@@ -22,7 +23,7 @@ const DIETARY_BADGE_COLORS: Record<string, string> = {
 
 const FeaturedProductsSection = () => {
   const { addToCart } = useCart();
-  const { data, isLoading } = useQuery<Product[]>({
+  const { data, isLoading, isError, refetch } = useQuery<Product[]>({
     queryKey: ["featured-products"],
     queryFn: () => getAllProducts(),
   });
@@ -70,6 +71,8 @@ const FeaturedProductsSection = () => {
               <LoadingState key={i} rows={3} />
             ))}
           </div>
+        ) : isError ? (
+          <ErrorState onRetry={refetch} />
         ) : products.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <p className="text-lg">Featured products will appear here soon.</p>

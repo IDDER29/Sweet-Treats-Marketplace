@@ -18,6 +18,7 @@ export async function getServerApi(): Promise<AxiosInstance> {
   const instance = axios.create({
     baseURL,
     headers: { "Content-Type": "application/json" },
+    timeout: 10_000,
   });
 
   const session = await auth();
@@ -37,4 +38,5 @@ export async function getServerApi(): Promise<AxiosInstance> {
 export const publicApi: AxiosInstance = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
+  timeout: 10_000,
 });

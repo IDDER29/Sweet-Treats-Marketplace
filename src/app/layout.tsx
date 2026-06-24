@@ -20,6 +20,28 @@ export const metadata: Metadata = {
   },
   description:
     "Discover and order cakes, pastries, and sweet treats from local bakeries near you.",
+  openGraph: {
+    type: "website",
+    siteName: "Sweet Treats Marketplace",
+    title: "Sweet Treats Marketplace",
+    description:
+      "Discover and order cakes, pastries, and sweet treats from local bakeries near you.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sweet Treats Marketplace",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sweet Treats Marketplace",
+    description:
+      "Discover and order cakes, pastries, and sweet treats from local bakeries near you.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({

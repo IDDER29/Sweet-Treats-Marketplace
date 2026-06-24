@@ -51,11 +51,17 @@ export function EnhancedAuthFlow() {
   useEffect(() => {
     const savedProgress = localStorage.getItem("authProgress");
     if (savedProgress) {
-      const { step, phoneNumber, email, address } = JSON.parse(savedProgress);
-      setStep(step);
-      setPhoneNumber(phoneNumber);
-      setEmail(email);
-      setAddress(address);
+      try {
+        const parsed = JSON.parse(savedProgress);
+        if (parsed && typeof parsed === "object") {
+          if (typeof parsed.step === "string") setStep(parsed.step);
+          if (typeof parsed.phoneNumber === "string") setPhoneNumber(parsed.phoneNumber);
+          if (typeof parsed.email === "string") setEmail(parsed.email);
+          if (typeof parsed.address === "string") setAddress(parsed.address);
+        }
+      } catch {
+        localStorage.removeItem("authProgress");
+      }
     }
   }, []);
 

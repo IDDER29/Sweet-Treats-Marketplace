@@ -1,7 +1,7 @@
 "use server";
 // utils/api.ts
 import axios, { AxiosResponse } from "axios";
-import { auth } from "@/auth"; // Ensure you have the auth function to get session
+import { auth } from "@/auth";
 
 interface BusinessRegistrationData {
   firstName: string;
@@ -23,37 +23,35 @@ interface ApiResponse {
 
 // Create axios instance
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "", // Use environment variable
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "",
   headers: {
     "Content-Type": "application/json",
   },
+  timeout: 10_000,
 });
 
 // Add interceptor to include session token in every request
 axiosInstance.interceptors.request.use(
   async (config) => {
     try {
-      const session = await auth(); // Get the session from NextAuth
-
+      const session = await auth();
       if (session?.user?.id) {
-        // Check if the session and user id exist
-        config.headers.Authorization = `Bearer ${session.user.id}`; // Set Bearer token
+        config.headers.Authorization = `Bearer ${session.user.id}`;
       }
-
       return config;
     } catch (error) {
-      console.error("Error in request interceptor:", error);
-      return Promise.reject(error);
+      throw error;
     }
   },
   (error) => {
-    return Promise.reject(error);
+    throw error;
   }
 );
+
 export const registerBusiness = async (
   data: BusinessRegistrationData
 ): Promise<ApiResponse> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   try {
     const response: AxiosResponse = await axios.post(
@@ -78,12 +76,12 @@ export const registerBusiness = async (
         message: "Failed to register business. Please try again.",
       };
     }
-  } catch (error: any) {
-    console.error("API Error:", error.response || error.message);
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
     return {
       success: false,
       message:
-        error.response?.data?.message ||
+        axiosError.response?.data?.message ||
         "An error occurred during registration.",
     };
   }
@@ -92,7 +90,7 @@ export const registerBusiness = async (
 export const getBusinessesByEmail = async (
   email: string
 ): Promise<ApiResponse> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   try {
     const response: AxiosResponse = await axios.get(
@@ -111,12 +109,12 @@ export const getBusinessesByEmail = async (
         message: "Failed to fetch businesses. Please try again.",
       };
     }
-  } catch (error: any) {
-    console.error("API Error:", error.response || error.message);
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string } } };
     return {
       success: false,
       message:
-        error.response?.data?.message ||
+        axiosError.response?.data?.message ||
         "An error occurred while fetching businesses.",
     };
   }
@@ -126,7 +124,7 @@ export const businessesLogIn = async (
   email: string,
   password: string
 ): Promise<ApiResponse> => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
 
   try {
     const response: AxiosResponse = await axios.post(
@@ -142,130 +140,99 @@ export const businessesLogIn = async (
     if (response.status === 201) {
       return {
         success: true,
-        message: "Businesses fetched successfully.",
+        message: "Login successful.",
         data: response.data,
       };
     } else {
       return {
         success: false,
-        message: "Failed to fetch businesses. Please try again.",
+        message: "Login failed. Please try again.",
       };
     }
-  } catch (error: any) {
-    console.error("API Error:", error.response || error.message);
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string } } };
     return {
       success: false,
       message:
-        error.response?.data?.message ||
-        "An error occurred while fetching businesses.",
+        axiosError.response?.data?.message ||
+        "An error occurred during login.",
     };
   }
 };
 
-// Function to send product data to the server
-// Function to send product data to the server
 export const createNewProduct = async (productData: any) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
+    const session = await auth();
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
-    const newProduct = JSON.stringify(productData);
-    // Use axiosInstance which already has the base URL and token in the interceptor
-    console.log("response", newProduct);
     const response = await axios.post(`${apiUrl}/products`, productData, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+        Authorization: `Bearer ${session.user.id}`,
       },
     });
-
     return response.data;
   } catch (error) {
-    console.error(
-      "Error submitting product:",
-      error instanceof Error ? error.message : String(error)
-    );
     throw error;
   }
 };
 
 export const getBusinessesProducts = async () => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
+    const session = await auth();
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
-
     const response = await axios.get(`${apiUrl}/products`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+        Authorization: `Bearer ${session.user.id}`,
       },
     });
-
     return response.data;
   } catch (error) {
-    console.error("Error submitting product:", error);
     throw error;
   }
 };
 
 export const deleteProductById = async (id: string) => {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
+    const session = await auth();
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
-
     const response = await axios.delete(`${apiUrl}/products/${id}`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+        Authorization: `Bearer ${session.user.id}`,
       },
     });
-
     return response.data;
   } catch (error) {
-    console.error("Error submitting product:", error);
     throw error;
   }
 };
 
-// utils/api.ts
 export async function getProductById(productId: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
+    const session = await auth();
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
     const response = await axios.get(`${apiUrl}/products/${productId}`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+        Authorization: `Bearer ${session.user.id}`,
       },
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching product:", error);
-    throw error; // Rethrow the error for the caller to handle
+    throw error;
   }
 }
 
@@ -273,12 +240,9 @@ export async function updateProduct(
   productId: string,
   updatedProductData: any
 ) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
-    const session = await auth(); // Get the session from NextAuth
-    const sessionReq = JSON.stringify(session);
-
-    // Ensure that session.user exists and contains the user ID
+    const session = await auth();
     if (!session?.user?.id) {
       throw new Error("User is not authenticated");
     }
@@ -288,31 +252,26 @@ export async function updateProduct(
       {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${sessionReq}`, // Send the user ID in the headers
+          Authorization: `Bearer ${session.user.id}`,
         },
       }
     );
-
     return response.data;
   } catch (error) {
-    console.error("Error updating product:", error);
-    throw error; // Rethrow the error for the caller to handle
+    throw error;
   }
 }
 
 export async function getAllProducts() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || ""; // Provide a fallback if env is missing
-
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
   try {
     const response = await axios.get(`${apiUrl}/products`, {
       headers: {
         "Content-Type": "application/json",
       },
     });
-    console.log("response", response);
     return response.data;
   } catch (error) {
-    console.error("Error fetching product:", error);
-    throw error; // Rethrow the error for the caller to handle
+    throw error;
   }
 }
