@@ -32,11 +32,19 @@ const Navbar = async () => {
           { href: "/business/settings", label: "Settings" },
         ]
       : role === "driver"
-      ? [{ href: "/delivery-provider/dashboard", label: "Dashboard" }]
+      ? [
+          { href: "/delivery-provider/dashboard", label: "Dashboard" },
+          { href: "/delivery-provider/earnings", label: "Earnings" },
+          { href: "/delivery-provider/profile", label: "My Profile" },
+        ]
       : [
           { href: "/customer/profile", label: "My Profile" },
           { href: "/customer/orders", label: "My Orders" },
           { href: "/customer/wishlist", label: "Wishlist" },
+          { href: "/customer/addresses", label: "Addresses" },
+          { href: "/customer/notifications", label: "Notifications" },
+          { href: "/customer/reviews", label: "My Reviews" },
+          { href: "/customer/payment-methods", label: "Payment Methods" },
         ];
 
   return (

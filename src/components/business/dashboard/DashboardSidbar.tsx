@@ -8,6 +8,12 @@ import {
   Settings,
   ShoppingBag,
   X,
+  Star,
+  Tag,
+  Users,
+  Boxes,
+  MessageSquare,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -19,13 +25,44 @@ interface DashboardSidebarProps {
   onClose?: () => void;
 }
 
-const NAV_ITEMS = [
-  { href: "/business/dashboard", icon: Home, label: "Dashboard" },
-  { href: "/business/dashboard/sales", icon: BarChart, label: "Sales" },
-  { href: "/business/dashboard/delivery", icon: Truck, label: "Delivery" },
-  { href: "/business/dashboard/products", icon: Package, label: "Products" },
-  { href: "/business/dashboard/orders", icon: ShoppingBag, label: "Orders" },
-  { href: "/business/settings", icon: Settings, label: "Settings" },
+const NAV_SECTIONS = [
+  {
+    label: "Overview",
+    items: [
+      { href: "/business/dashboard", icon: Home, label: "Dashboard" },
+      { href: "/business/dashboard/sales", icon: BarChart, label: "Sales" },
+    ],
+  },
+  {
+    label: "Catalogue",
+    items: [
+      { href: "/business/dashboard/products", icon: Package, label: "Products" },
+      { href: "/business/dashboard/inventory", icon: Boxes, label: "Inventory" },
+    ],
+  },
+  {
+    label: "Customers",
+    items: [
+      { href: "/business/dashboard/orders", icon: ShoppingBag, label: "Orders" },
+      { href: "/business/dashboard/reviews", icon: Star, label: "Reviews" },
+      { href: "/business/dashboard/messages", icon: MessageSquare, label: "Messages" },
+      { href: "/business/dashboard/customers", icon: Users, label: "Customers" },
+    ],
+  },
+  {
+    label: "Growth",
+    items: [
+      { href: "/business/dashboard/promotions", icon: Tag, label: "Promotions" },
+      { href: "/business/dashboard/delivery", icon: Truck, label: "Delivery" },
+    ],
+  },
+  {
+    label: "Store",
+    items: [
+      { href: "/business/store", icon: Store, label: "My Store" },
+      { href: "/business/settings", icon: Settings, label: "Settings" },
+    ],
+  },
 ];
 
 const Sidebar = ({ isOpen = false, onClose = () => {} }: DashboardSidebarProps) => {
@@ -57,19 +94,28 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }: DashboardSidebarProps) 
           </Button>
         </div>
         <ScrollArea className="flex-1 px-3 py-4">
-          <nav className="space-y-1">
-            {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
-              <Button
-                key={href}
-                variant="ghost"
-                className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white"
-                asChild
-              >
-                <Link href={href}>
-                  <Icon className="mr-3 h-4 w-4" />
+          <nav className="space-y-5">
+            {NAV_SECTIONS.map(({ label, items }) => (
+              <div key={label}>
+                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-widest text-white/40">
                   {label}
-                </Link>
-              </Button>
+                </p>
+                <div className="space-y-0.5">
+                  {items.map(({ href, icon: Icon, label: itemLabel }) => (
+                    <Button
+                      key={href}
+                      variant="ghost"
+                      className="w-full justify-start text-white/80 hover:bg-white/10 hover:text-white h-9"
+                      asChild
+                    >
+                      <Link href={href}>
+                        <Icon className="mr-3 h-4 w-4 shrink-0" />
+                        {itemLabel}
+                      </Link>
+                    </Button>
+                  ))}
+                </div>
+              </div>
             ))}
           </nav>
         </ScrollArea>
