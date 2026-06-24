@@ -1,54 +1,68 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { getProductById } from "@/utils/api";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { EmptyState } from "@/components/feedback/EmptyState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import ProductImageGallery from "./products-deties/ProductImageGallery";
 import ProductInformation from "./products-deties/ProductInformation";
 import ReviewsSection from "./products-deties/ReviewsSection";
 
-// Custom Hook to manage product fetching and state
-const useProductDetails = (productId: string) => {
-  const [product, setProduct] = useState();
+interface ProductImage {
+  url: string;
+  name: string;
+}
+
+interface ProductDetails {
+  name: string;
+  rating: number;
+  reviewCount: number;
+  price: number;
+  description: string;
+  ingredients: string;
+  allergens: string;
+  size: string;
+  availability: string;
+  options: string[];
+  images: ProductImage[];
+}
+
+const useProductDetails = (productId: string | null) => {
+  const [product, setProduct] = useState<ProductDetails | null>(null);
   const [mainImage, setMainImage] = useState("");
-  const [images, setImages] = useState();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
     const fetchProductData = async () => {
       try {
-        const product = await getProductById(productId);
-        if (product) {
-          setProduct(product);
-          console.log(product);
-          setMainImage(product.images?.[0].url || ""); // Ensure images exist
-          setImages(product.images);
-          setSelectedSize(product.options?.[0] || ""); // Ensure options exist
+        setLoading(true);
+        setIsError(false);
+        const fetched = await getProductById(productId);
+        if (fetched) {
+          setProduct(fetched);
+          setMainImage(fetched.images?.[0]?.url || "");
+          setSelectedSize(fetched.options?.[0] || "");
         } else {
-          throw new Error("Product not found");
+          setProduct(null);
         }
-      } catch (error) {
+      } catch {
+        setIsError(true);
         toast.error("Failed to load product data.");
       } finally {
         setLoading(false);
       }
     };
-
-    if (productId) fetchProductData();
+    fetchProductData();
   }, [productId]);
 
   return {
@@ -60,98 +74,65 @@ const useProductDetails = (productId: string) => {
     selectedSize,
     setSelectedSize,
     loading,
-    images,
+    isError,
   };
 };
 
-export default function ProductDetailsPage() {
+export default function ProductDetailsPage({ id }: { id?: string }) {
   const searchParams = useSearchParams();
-  const productId = searchParams.get("id");
-  const { product, loading, images } = useProductDetails(productId);
-  const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
-  const [reviewCount, setReviewCount] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [allergens, setAllergens] = useState("");
-  const [size, setSize] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [options, setOptions] = useState([]);
+  const productId = id ?? searchParams.get("id");
+  const { product, loading, isError } = useProductDetails(productId);
 
-  useEffect(() => {
-    if (product) {
-      const {
-        name,
-        rating,
-        reviewCount,
-        price,
-        description,
-        ingredients,
-        allergens,
-        size,
-        availability,
-        options,
-      } = product;
-      setName(name);
-      setRating(rating);
-      setReviewCount(reviewCount);
-      setPrice(price);
-      setDescription(description);
-      setIngredients(ingredients);
-      setAllergens(allergens);
-      setSize(size);
-      setAvailability(availability);
-      setOptions(options);
-    }
-  }, [product]);
-  console.log;
-  // States for zoom effect and review form
-  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState rows={6} />
+      </div>
+    );
+  }
 
-  if (loading) return <p>Loading...</p>;
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <ErrorState onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
 
-  if (!product) return <p>Product not found.</p>;
-
-  const handleSubmitReview = () => {
-    if (newReview.comment.trim().length < 10) {
-      toast.error("Review comment must be at least 10 characters long.");
-      return;
-    }
-    console.log("Submitted review:", newReview);
-    // Implement actual review submission logic here
-    setNewReview({ rating: 5, comment: "" });
-    toast.success("Review submitted successfully.");
-  };
+  if (!product) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <EmptyState
+          title="Product not found"
+          message="This product may no longer be available."
+          actionLabel="Browse products"
+          actionHref="/products"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Product Image Gallery */}
-        <ProductImageGallery productImageData={images} />
-
-        {/* Product Information */}
+        <ProductImageGallery productImageData={product.images ?? []} />
         <ProductInformation
           productInfoData={{
-            id: productId,
-            name,
-            rating,
-            reviewCount,
-            price,
-            description,
-            ingredients,
-            allergens,
-            size,
-            availability,
-            options,
+            id: productId ?? "",
+            name: product.name,
+            rating: product.rating,
+            reviewCount: product.reviewCount,
+            price: product.price,
+            description: product.description,
+            ingredients: product.ingredients,
+            allergens: product.allergens,
+            size: product.size,
+            availability: product.availability,
+            options: product.options,
           }}
         />
       </div>
-
-      {/* Reviews Section */}
-      <ReviewsSection
-        productReviewsData={[{ name: "idder", rating: 5, comment: "sadfsfd" }]}
-      />
+      <ReviewsSection productId={productId ?? undefined} />
     </div>
   );
 }

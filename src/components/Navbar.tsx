@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShoppingCartIcon, UserIcon } from "lucide-react";
+import { UserIcon, LogOut, Menu } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,26 +10,65 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { auth } from "@/auth";
 import { doLogout } from "@/app/actions";
-import { User, Settings, LogOut } from "lucide-react";
 import ShopingIcon from "./ShopingIcon";
+import { MAIN_NAV } from "@/config";
 
 const Navbar = async () => {
   const session = await auth();
+  const role = session?.user?.role;
+
+  const accountLinks =
+    role === "business"
+      ? [
+          { href: "/business/dashboard", label: "Dashboard" },
+          { href: "/business/profile", label: "Profile" },
+          { href: "/business/settings", label: "Settings" },
+        ]
+      : role === "driver"
+      ? [
+          { href: "/delivery-provider/dashboard", label: "Dashboard" },
+          { href: "/delivery-provider/earnings", label: "Earnings" },
+          { href: "/delivery-provider/profile", label: "My Profile" },
+        ]
+      : [
+          { href: "/customer/profile", label: "My Profile" },
+          { href: "/customer/orders", label: "My Orders" },
+          { href: "/customer/wishlist", label: "Wishlist" },
+          { href: "/customer/addresses", label: "Addresses" },
+          { href: "/customer/notifications", label: "Notifications" },
+          { href: "/customer/reviews", label: "My Reviews" },
+          { href: "/customer/payment-methods", label: "Payment Methods" },
+          { href: "/customer/loyalty", label: "Rewards" },
+        ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="font-bold text-xl">LocalEats</span>
+        <Link href="/" className="flex items-center space-x-2 mr-6">
+          <span className="font-bold text-xl">Sweet Treats</span>
         </Link>
-        <nav className="flex items-center space-x-6 text-sm font-medium ml-auto">
-          <Link href="/">Home</Link>
-          <Link href="/products">Products</Link>
-          <Link href="/about">About Us</Link>
-          <Link href="/contact">Contact</Link>
 
+        {/* Desktop nav */}
+        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+          {MAIN_NAV.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-3">
           <ShopingIcon />
 
           {session?.user ? (
@@ -42,9 +81,11 @@ const Navbar = async () => {
                   <Avatar className="h-8 w-8">
                     <AvatarImage
                       src={session?.user?.image ?? ""}
-                      alt="Store Owner Image"
+                      alt="Account"
                     />
-                    <AvatarFallback>SD</AvatarFallback>
+                    <AvatarFallback>
+                      {session?.user?.name?.[0]?.toUpperCase() ?? "U"}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -60,18 +101,15 @@ const Navbar = async () => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
+                {accountLinks.map((link) => (
+                  <DropdownMenuItem key={link.href} asChild>
+                    <Link href={link.href}>{link.label}</Link>
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <form action={doLogout} method="post">
-                    <button type="submit" className="flex items-center">
+                    <button type="submit" className="flex w-full items-center">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </button>
@@ -80,11 +118,47 @@ const Navbar = async () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login">
+            <Link href="/auth/login" aria-label="Sign in">
               <UserIcon className="h-5 w-5" />
             </Link>
           )}
-        </nav>
+
+          {/* Mobile hamburger */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <Link href="/" className="mb-6 block font-bold text-xl">
+                Sweet Treats
+              </Link>
+              <nav className="flex flex-col gap-1">
+                {MAIN_NAV.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+              {!session?.user && (
+                <div className="mt-6 flex flex-col gap-2">
+                  <Button asChild>
+                    <Link href="/auth/login">Sign In</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/auth/register">Register</Link>
+                  </Button>
+                </div>
+              )}
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   );

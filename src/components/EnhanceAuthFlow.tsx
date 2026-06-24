@@ -24,7 +24,7 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 // Simulated API functions (replace with actual API calls in production)
-const simulateApiCall = (data: any) =>
+const simulateApiCall = <T,>(data: T): Promise<T> =>
   new Promise((resolve) => setTimeout(() => resolve(data), 1000));
 const simulateUserCheck = () =>
   simulateApiCall({ exists: Math.random() > 0.5 });
@@ -51,11 +51,17 @@ export function EnhancedAuthFlow() {
   useEffect(() => {
     const savedProgress = localStorage.getItem("authProgress");
     if (savedProgress) {
-      const { step, phoneNumber, email, address } = JSON.parse(savedProgress);
-      setStep(step);
-      setPhoneNumber(phoneNumber);
-      setEmail(email);
-      setAddress(address);
+      try {
+        const parsed = JSON.parse(savedProgress);
+        if (parsed && typeof parsed === "object") {
+          if (typeof parsed.step === "string") setStep(parsed.step);
+          if (typeof parsed.phoneNumber === "string") setPhoneNumber(parsed.phoneNumber);
+          if (typeof parsed.email === "string") setEmail(parsed.email);
+          if (typeof parsed.address === "string") setAddress(parsed.address);
+        }
+      } catch {
+        localStorage.removeItem("authProgress");
+      }
     }
   }, []);
 
@@ -353,7 +359,7 @@ export function EnhancedAuthFlow() {
 
         {step === "verifyPhone" && (
           <div className="space-y-4">
-            <p className="text-center">We've sent a code to {phoneNumber}</p>
+            <p className="text-center">We&apos;ve sent a code to {phoneNumber}</p>
             <Input
               placeholder="Enter verification code"
               value={verificationCode}

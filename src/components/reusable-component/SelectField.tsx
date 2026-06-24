@@ -19,15 +19,14 @@ function SelectField({
   label: string;
   options: string[];
   required?: boolean;
-  id: string;
-  value: string; // Added value prop
+  id?: string;
+  value?: string; // Added value prop
   onChange: (value: string) => void; // Added onChange prop type
 }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       <Select
-        id={id}
         value={value} // Controlled value
         onValueChange={onChange} // Handle selection change
         required

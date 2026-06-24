@@ -1,233 +1,161 @@
-import React from "react";
-import {
-  ThumbsUp,
-  Clock,
-  Bike,
-  Award,
-  Search,
-  Plus,
-  ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+"use client";
+
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ThumbsUp, Clock, Bike, Search, Store as StoreIcon } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { EmptyState } from "@/components/feedback/EmptyState";
+import { formatCurrency } from "@/lib/currency";
+import { getStores } from "@/services/stores";
+import type { Store } from "@/types";
 
-export default function BakeryStorePage() {
+export default function StoresPage() {
+  const [search, setSearch] = useState<string>("");
+
+  const { data, isLoading, isError, refetch } = useQuery<Store[]>({
+    queryKey: ["stores"],
+    queryFn: () => getStores(),
+  });
+
+  const stores = useMemo<Store[]>(() => {
+    const list = data ?? [];
+    const q = search.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (s) =>
+        s.name?.toLowerCase().includes(q) ||
+        s.address?.toLowerCase().includes(q)
+    );
+  }, [data, search]);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="text-sm breadcrumbs mb-4">
-        <ul>
-          <li>
-            <a href="#">Sweetville</a>
-          </li>
-          <li>
-            <a href="#">Bakeries</a>
-          </li>
-          <li>Sweet Delights Bakery</li>
-        </ul>
+      <div className="mb-6 flex items-center justify-between gap-2">
+        <h1 className="text-3xl font-bold">Stores</h1>
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Search stores"
+            className="pl-9"
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearch(e.target.value)
+            }
+          />
+        </div>
       </div>
 
-      <Card className="mb-8">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <img
-              src="/placeholder.svg?height=80&width=80"
-              alt="Sweet Delights Bakery Logo"
-              className="w-20 h-20 rounded-full"
+      {isLoading && <LoadingState rows={5} />}
+
+      {isError && (
+        <ErrorState
+          title="Couldn't load stores"
+          message="We couldn't fetch the stores right now. Please try again."
+          onRetry={() => refetch()}
+        />
+      )}
+
+      {!isLoading && !isError && (data ?? []).length === 0 && (
+        <EmptyState
+          icon={<StoreIcon className="h-10 w-10" />}
+          title="No stores found"
+          message="There are no stores to show yet."
+        />
+      )}
+
+      {!isLoading && !isError && (data ?? []).length > 0 && (
+        <>
+          {stores.length === 0 ? (
+            <EmptyState
+              icon={<StoreIcon className="h-10 w-10" />}
+              title="No matching stores"
+              message={`No stores match "${search}". Try a different search.`}
             />
-            <div>
-              <h1 className="text-3xl font-bold">Sweet Delights Bakery</h1>
-              <p className="text-sm text-muted-foreground">
-                Indulge in our handcrafted pastries and artisanal breads, baked
-                fresh daily.
-              </p>
-            </div>
-            <Button variant="outline" className="ml-auto">
-              Translate
-            </Button>
-          </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {stores.map((store) => (
+                <Link key={store.id} href={`/business/stores/${store.id}`}>
+                  <Card className="h-full transition-shadow hover:shadow-md">
+                    <CardContent className="p-6">
+                      <div className="mb-4 flex items-center gap-4">
+                        {store.logoUrl ? (
+                          <Image
+                            src={store.logoUrl}
+                            alt={store.name}
+                            width={64}
+                            height={64}
+                            className="h-16 w-16 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+                            <StoreIcon className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <h2 className="truncate text-xl font-bold">
+                            {store.name}
+                          </h2>
+                          {store.address && (
+                            <p className="truncate text-sm text-muted-foreground">
+                              {store.address}
+                            </p>
+                          )}
+                        </div>
+                      </div>
 
-          <Badge variant="secondary" className="mb-4">
-            20% off selected items
-          </Badge>
+                      {store.description && (
+                        <p className="mb-4 line-clamp-2 text-sm text-muted-foreground">
+                          {store.description}
+                        </p>
+                      )}
 
-          <div className="flex gap-8 text-sm">
-            <div className="flex items-center gap-2">
-              <ThumbsUp className="w-5 h-5" />
-              <span>95%</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span>20-30 min</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bike className="w-5 h-5" />
-              <span>$2.50 delivery</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Award className="w-5 h-5" />
-              <span>Premium</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                      <div className="flex flex-wrap gap-4 text-sm">
+                        {typeof store.rating === "number" && (
+                          <div className="flex items-center gap-2">
+                            <ThumbsUp className="h-4 w-4" />
+                            <span>{store.rating.toFixed(1)}</span>
+                          </div>
+                        )}
+                        {store.deliveryTime && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            <span>{store.deliveryTime}</span>
+                          </div>
+                        )}
+                        {typeof store.deliveryFee === "number" && (
+                          <div className="flex items-center gap-2">
+                            <Bike className="h-4 w-4" />
+                            <span>
+                              {formatCurrency(store.deliveryFee)} delivery
+                            </span>
+                          </div>
+                        )}
+                      </div>
 
-      <div className="grid grid-cols-4 gap-8">
-        <div className="col-span-1">
-          <h2 className="text-lg font-semibold mb-4">Sections</h2>
-          <ul className="space-y-2">
-            <li>
-              <a href="#promotions" className="text-primary hover:underline">
-                Promotions
-              </a>
-            </li>
-            <li>
-              <a href="#top-sellers" className="hover:underline">
-                Top sellers
-              </a>
-            </li>
-            <li>
-              <a href="#breads" className="hover:underline">
-                Breads
-              </a>
-            </li>
-            <li>
-              <a href="#pastries" className="hover:underline">
-                Pastries
-              </a>
-            </li>
-            <li>
-              <a href="#cakes" className="hover:underline">
-                Cakes
-              </a>
-            </li>
-            <li>
-              <a href="#combo-deals" className="hover:underline">
-                Combo Deals
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <div className="col-span-3">
-          <div className="mb-6">
-            <Input
-              type="search"
-              placeholder="Search in Sweet Delights Bakery"
-              className="w-full"
-            />
-          </div>
-
-          <section id="promotions" className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 flex items-center">
-              <img
-                src="/placeholder.svg?height=24&width=24"
-                alt=""
-                className="w-6 h-6 mr-2"
-              />
-              Promotions
-            </h2>
-            <Card>
-              <CardContent className="p-0">
-                <div className="relative">
-                  <img
-                    src="/placeholder.svg?height=200&width=400"
-                    alt="Assorted pastries"
-                    className="w-full h-48 object-cover"
-                  />
-                  <Badge className="absolute top-2 left-2 bg-red-500 text-white">
-                    -30%
-                  </Badge>
-                  <Button
-                    size="icon"
-                    className="absolute bottom-2 right-2 rounded-full"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold">
-                    Family Box: 12 Assorted Pastries
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    A delightful mix of our best-selling pastries
-                  </p>
-                  <div className="mt-2">
-                    <span className="text-lg font-bold">$24.99</span>
-                    <span className="text-sm text-muted-foreground line-through ml-2">
-                      $35.70
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </section>
-
-          <section id="top-sellers" className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 flex items-center justify-between">
-              <span className="flex items-center">
-                <img
-                  src="/placeholder.svg?height=24&width=24"
-                  alt=""
-                  className="w-6 h-6 mr-2"
-                />
-                Top sellers
-              </span>
-              <Button variant="ghost" size="sm">
-                See all
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                {
-                  name: "Sourdough Bread",
-                  price: "$5.99",
-                  image: "/placeholder.svg?height=100&width=200",
-                },
-                {
-                  name: "Chocolate Croissant",
-                  price: "$3.50",
-                  image: "/placeholder.svg?height=100&width=200",
-                },
-                {
-                  name: "Cinnamon Roll",
-                  price: "$4.25",
-                  image: "/placeholder.svg?height=100&width=200",
-                },
-                {
-                  name: "Blueberry Muffin",
-                  price: "$2.75",
-                  image: "/placeholder.svg?height=100&width=200",
-                },
-              ].map((product, index) => (
-                <Card key={index}>
-                  <CardContent className="p-4 flex items-center gap-4">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <div>
-                      <h3 className="font-semibold">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {product.price}
-                      </p>
-                    </div>
-                    <Button size="icon" className="ml-auto rounded-full">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                      {store.categories && store.categories.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {store.categories.map((category) => (
+                            <Badge key={category} variant="secondary">
+                              {category}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
-          </section>
-
-          {/* Additional sections (Breads, Pastries, etc.) would be added here, following a similar structure */}
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

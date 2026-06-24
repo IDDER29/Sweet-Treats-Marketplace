@@ -1,6 +1,13 @@
-import react, { createContext, useState } from "react";
+import React, { createContext, Dispatch, SetStateAction, useState } from "react";
 
-const AppContext = createContext();
+type AppState = { counter: number };
+
+type AppContextType = {
+  state: AppState;
+  setState: Dispatch<SetStateAction<AppState>>;
+};
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({
   children,

@@ -1,150 +1,232 @@
 "use client";
-import Image from "next/image";
+import { Suspense } from "react";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { CheckCircle2, Package, ChefHat, Bike, Mail, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { LoadingState } from "@/components/feedback/LoadingState";
+import { ErrorState } from "@/components/feedback/ErrorState";
+import { formatCurrency } from "@/lib/currency";
+import { getOrderById } from "@/services/orders";
 
-// Mock data for the order
-const order = {
-  id: "ORD-12345",
-  items: [
-    { id: 1, name: "Chocolate Cake", price: 25.99, quantity: 1 },
-    { id: 2, name: "Strawberry Tart", price: 18.99, quantity: 2 },
-    { id: 3, name: "Macarons Set", price: 15.99, quantity: 1 },
-  ],
-  subtotal: 79.96,
-  deliveryFee: 5.99,
-  tax: 7.99,
-  total: 93.94,
-  shippingAddress: "123 Main St, Anytown, AN 12345",
-  estimatedDelivery: "Tomorrow, 2pm - 4pm",
-};
-
-// Mock data for recommended products
-const recommendedProducts = [
+const NEXT_STEPS = [
   {
-    id: 1,
-    name: "Blueberry Muffins",
-    price: 12.99,
-    image: "/placeholder.svg?height=100&width=100",
+    icon: Package,
+    label: "Order received",
+    description: "We've received your order and confirmed it with the store.",
   },
   {
-    id: 2,
-    name: "Cinnamon Rolls",
-    price: 14.99,
-    image: "/placeholder.svg?height=100&width=100",
+    icon: ChefHat,
+    label: "Being prepared",
+    description: "The bakery is freshly preparing your items right now.",
   },
   {
-    id: 3,
-    name: "Lemon Tart",
-    price: 16.99,
-    image: "/placeholder.svg?height=100&width=100",
+    icon: Bike,
+    label: "Out for delivery",
+    description: "A driver will pick up your order and head your way.",
   },
 ];
 
-export default function OrderConfirmationPage() {
+function Confirmation() {
+  const params = useSearchParams();
+  const orderId = params.get("orderId");
+
+  const {
+    data: order,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["order", orderId],
+    queryFn: () => getOrderById(orderId as string),
+    enabled: !!orderId,
+  });
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Confirmation Message */}
-      <div className="text-center mb-8">
-        <CheckCircle2 className="mx-auto h-16 w-16 text-green-500 mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Thank You for Your Order!</h1>
-        <p className="text-xl text-muted-foreground">
-          Your order number is <span className="font-semibold">{order.id}</span>
-        </p>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Success hero */}
+      <div className="text-center mb-10">
+        <div className="flex justify-center mb-5">
+          <CheckCircle2 className="h-20 w-20 text-green-500 animate-bounce" />
+        </div>
+        <h1 className="text-3xl md:text-4xl font-extrabold mb-2 text-gray-900">
+          Order Confirmed! 🎉
+        </h1>
+        {order?.number || orderId ? (
+          <p className="text-lg text-muted-foreground">
+            Order{" "}
+            <span className="font-semibold text-foreground">
+              #{order?.number ?? orderId}
+            </span>{" "}
+            is on its way.
+          </p>
+        ) : (
+          <p className="text-lg text-muted-foreground">
+            Your order has been received.
+          </p>
+        )}
+
+        {/* Estimated delivery — shown if available */}
+        {order?.estimatedDeliveryAt && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-4 py-2 text-sm font-medium text-amber-800">
+            <Bike className="h-4 w-4" />
+            Estimated delivery: {order.estimatedDeliveryAt}
+          </div>
+        )}
       </div>
 
-      {/* Order Details */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Order Details</CardTitle>
+      {/* What happens next — timeline */}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold">What happens next?</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {order.items.map((item) => (
-              <div key={item.id} className="flex justify-between">
-                <span>
-                  {item.name} x {item.quantity}
-                </span>
-                <span>${(item.price * item.quantity).toFixed(2)}</span>
-              </div>
-            ))}
-            <div className="border-t pt-4">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>${order.subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Delivery Fee</span>
-                <span>${order.deliveryFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax</span>
-                <span>${order.tax.toFixed(2)}</span>
-              </div>
-            </div>
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>${order.total.toFixed(2)}</span>
-            </div>
-          </div>
-          <div className="mt-6 space-y-2">
-            <p>
-              <span className="font-semibold">Shipping Address:</span>{" "}
-              {order.shippingAddress}
-            </p>
-            <p>
-              <span className="font-semibold">Estimated Delivery:</span>{" "}
-              {order.estimatedDelivery}
-            </p>
-          </div>
-          <div className="mt-6">
-            <Link
-              href="/order-tracking"
-              className="text-primary hover:underline"
-            >
-              Track Your Order
-            </Link>
-          </div>
+          <ol className="relative space-y-0">
+            {NEXT_STEPS.map((step, i) => {
+              const Icon = step.icon;
+              const isLast = i === NEXT_STEPS.length - 1;
+              return (
+                <li key={step.label} className="flex gap-4">
+                  {/* Timeline column */}
+                  <div className="flex flex-col items-center">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-600 flex-shrink-0">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    {!isLast && (
+                      <div className="w-px flex-1 bg-amber-200 my-1 min-h-[1.5rem]" />
+                    )}
+                  </div>
+                  {/* Content */}
+                  <div className={`pb-5 ${isLast ? "" : ""}`}>
+                    <p className="font-semibold text-sm leading-tight mt-1.5">
+                      {step.label}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
         </CardContent>
       </Card>
 
-      {/* Next Steps and Recommendations */}
-      <div className="space-y-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-4">What's Next?</h2>
-          <p className="text-muted-foreground">
-            Your order will be processed and prepared for delivery. You'll
-            receive an email confirmation shortly with more details about your
-            order and tracking information.
-          </p>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recommendedProducts.map((product) => (
-              <Card key={product.id}>
-                <CardContent className="p-4">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    width={100}
-                    height={100}
-                    className="rounded-md mb-2"
-                  />
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-muted-foreground">
-                    ${product.price.toFixed(2)}
-                  </p>
-                  <Button className="w-full mt-2">Add to Cart</Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+      {/* Order details card */}
+      {orderId && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Order Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading && <LoadingState rows={4} />}
+            {isError && (
+              <ErrorState
+                title="Couldn't load order details"
+                message="Your order was placed, but we couldn't load its details right now."
+                onRetry={() => refetch()}
+              />
+            )}
+            {order && (
+              <div className="space-y-4">
+                {/* Items */}
+                <div className="space-y-2">
+                  {order.items.map((item) => (
+                    <div key={item.productId} className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        {item.name}{" "}
+                        <span className="font-medium text-foreground">× {item.quantity}</span>
+                      </span>
+                      <span className="font-medium">
+                        {formatCurrency(item.price * item.quantity)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <Separator />
+
+                {/* Totals */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span>{formatCurrency(order.subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Delivery Fee</span>
+                    <span>{formatCurrency(order.deliveryFee)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tax</span>
+                    <span>{formatCurrency(order.tax)}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex justify-between items-baseline">
+                  <span className="font-bold text-base">Total</span>
+                  <span className="font-extrabold text-xl text-amber-700">
+                    {formatCurrency(order.total)}
+                  </span>
+                </div>
+
+                {/* Shipping address */}
+                {order.shippingAddress && (
+                  <div className="mt-2 flex items-start gap-2 text-sm text-muted-foreground rounded-lg bg-muted/40 px-3 py-2.5">
+                    <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-600" />
+                    <span>
+                      {[order.shippingAddress.line1, order.shippingAddress.city]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Receipt by email note */}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-4 py-3 mb-6">
+        <Mail className="h-4 w-4 flex-shrink-0" />
+        <span>A receipt has been sent to your email address.</span>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {order?.id && (
+          <Button
+            className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-semibold h-11"
+            asChild
+          >
+            <Link
+              href={`/order-tracking?orderId=${encodeURIComponent(order.id)}`}
+            >
+              Track Order
+            </Link>
+          </Button>
+        )}
+        <Button variant="outline" className="flex-1 h-11" asChild>
+          <Link href="/products">Continue Shopping</Link>
+        </Button>
+        <Button variant="ghost" className="flex-1 h-11" asChild>
+          <Link href="/customer/orders">View My Orders</Link>
+        </Button>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<LoadingState className="container mx-auto px-4 py-8" />}>
+      <Confirmation />
+    </Suspense>
   );
 }

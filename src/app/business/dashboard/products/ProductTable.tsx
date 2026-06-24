@@ -1,17 +1,24 @@
 // ProductTable.tsx
+"use client";
+
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import ProductTableRow from "./ProductTableRow";
+import type { Product } from "@/types";
 
-const ProductTable = ({ products }: { products: any[] }) => {
+interface ProductTableProps {
+  products: Product[];
+  onChanged?: () => void;
+}
+
+const ProductTable = ({ products, onChanged }: ProductTableProps) => {
   return (
     <Card>
       <CardContent>
@@ -27,8 +34,12 @@ const ProductTable = ({ products }: { products: any[] }) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product: any) => (
-              <ProductTableRow key={product.id} product={product} />
+            {products.map((product) => (
+              <ProductTableRow
+                key={product.id}
+                product={product}
+                onChanged={onChanged}
+              />
             ))}
           </TableBody>
         </Table>

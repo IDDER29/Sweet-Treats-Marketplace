@@ -1,9 +1,9 @@
 "use server";
 
 import { signIn, signOut } from "@/auth";
-export async function doSocialLogin(formData: any) {
-  const action = formData.get("action");
 
+export async function doSocialLogin(formData: FormData) {
+  const action = formData.get("action") as string;
   await signIn(action, { redirectTo: "/business/profile" });
 }
 
@@ -11,26 +11,17 @@ export async function doLogout() {
   await signOut({ redirectTo: "/auth/login" });
 }
 
-export async function doCredentialLogin(formData: any) {
+export async function doCredentialLogin(formData: FormData) {
   try {
-    // Extract form data into an object
-    const email = formData.get("email");
-    const password = formData.get("password");
-
-    // Pass the extracted values to signIn
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
     const response = await signIn("credentials", {
       email,
       password,
       redirect: false,
     });
-
-    if (response?.error) {
-      console.error("Login error:", response.error);
-      throw new Error(response.error);
-    }
-
     return response;
-  } catch (error) {
-    console.log(error);
+  } catch {
+    throw new Error("Authentication failed");
   }
 }

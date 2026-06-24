@@ -3,11 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const Welcome = ({ phoneNumber, setPhoneNumber, handlePhoneSubmit }) => {
+interface WelcomeProps {
+  phoneNumber: string;
+  setPhoneNumber: (value: string) => void;
+  handlePhoneSubmit: () => void;
+}
+
+const Welcome = ({
+  phoneNumber,
+  setPhoneNumber,
+  handlePhoneSubmit,
+}: WelcomeProps) => {
   return (
     <>
       <div className="space-y-4">
-        <p className="text-center">Let's start with your phone number</p>
+        <p className="text-center">Let&apos;s start with your phone number</p>
         <div className="flex space-x-2">
           <div className="w-1/3">
             <Label htmlFor="prefix">Prefix</Label>

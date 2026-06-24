@@ -15,7 +15,20 @@ import {
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
 
-export default function SearchFilterBar({ initialProducts }) {
+interface Product {
+  name: string;
+  price: number;
+  category: string;
+  dietary: string[];
+}
+
+interface SearchFilterBarProps {
+  initialProducts: Product[];
+}
+
+export default function SearchFilterBar({
+  initialProducts,
+}: SearchFilterBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [priceRange, setPriceRange] = useState([0, 50]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -95,7 +108,7 @@ export default function SearchFilterBar({ initialProducts }) {
                 onCheckedChange={(checked) =>
                   setDietaryPreferences((prev) => ({
                     ...prev,
-                    "gluten-free": checked,
+                    "gluten-free": !!checked,
                   }))
                 }
               />
@@ -107,7 +120,7 @@ export default function SearchFilterBar({ initialProducts }) {
                 onCheckedChange={(checked) =>
                   setDietaryPreferences((prev) => ({
                     ...prev,
-                    vegan: checked,
+                    vegan: !!checked,
                   }))
                 }
               />

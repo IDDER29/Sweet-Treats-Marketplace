@@ -1,10 +1,14 @@
 "use client";
 import { createContext, useContext, useState, useEffect } from "react";
 
-// Define initial cart context types
-interface CartItem {
+// Cart items keep a stable id + quantity, plus optional cached display
+// fields so the cart/checkout UIs can render without an extra fetch.
+export interface CartItem {
   id: string;
   quantity: number;
+  name?: string;
+  price?: number;
+  image?: string;
 }
 
 interface CartContextType {
@@ -15,72 +19,76 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   toggleCart: () => void;
   removeFromCart: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const STORAGE_KEY = "cart";
+
+const persist = (cart: CartItem[]) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  }
+};
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Assuming you have a function that checks if the user is logged in
-  const isUserRegistered = false; // You can replace this with actual logic
-
-  // Load cart from localStorage on component mount if user is not registered
+  // Load cart from localStorage on mount.
   useEffect(() => {
-    if (!isUserRegistered) {
-      const savedCart = localStorage.getItem("cart");
-      if (savedCart) {
-        setCart(JSON.parse(savedCart));
+    const saved =
+      typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+    if (saved) {
+      try {
+        setCart(JSON.parse(saved));
+      } catch {
+        // Ignore malformed storage.
       }
     }
-  }, [isUserRegistered]);
+  }, []);
 
-  // Function to toggle cart visibility
-  const toggleCart = () => {
-    setIsCartOpen((prevState) => !prevState);
-  };
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
 
-  // Add an item to the cart
   const addToCart = (itemToAdd: CartItem) => {
     setCart((prevCart) => {
-      // Check if the item already exists in the cart
-      const existingItem = prevCart.find((item) => item.id === itemToAdd.id);
-
-      let updatedCart;
-
-      if (existingItem) {
-        // Update the quantity of the existing item
-        updatedCart = prevCart.map((item) =>
-          item.id === itemToAdd.id
-            ? { ...item, quantity: item.quantity + itemToAdd.quantity }
-            : item
-        );
-      } else {
-        // Add new item to cart if it doesn't exist
-        updatedCart = [...prevCart, itemToAdd];
-      }
-
-      // Persist the updated cart to localStorage inside the setCart function
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-      return updatedCart; // Return the updated cart
+      const existing = prevCart.find((i) => i.id === itemToAdd.id);
+      const next = existing
+        ? prevCart.map((i) =>
+            i.id === itemToAdd.id
+              ? { ...i, ...itemToAdd, quantity: i.quantity + itemToAdd.quantity }
+              : i
+          )
+        : [...prevCart, itemToAdd];
+      persist(next);
+      return next;
     });
   };
 
-  // Remove an item from the cart
+  const updateQuantity = (id: string, quantity: number) => {
+    setCart((prevCart) => {
+      const next =
+        quantity <= 0
+          ? prevCart.filter((i) => i.id !== id)
+          : prevCart.map((i) => (i.id === id ? { ...i, quantity } : i));
+      persist(next);
+      return next;
+    });
+  };
+
   const removeFromCart = (id: string) => {
     setCart((prevCart) => {
-      const updatedCart = prevCart.filter((item) => item.id !== id);
-
-      if (!isUserRegistered) {
-        localStorage.setItem("cart", JSON.stringify(updatedCart));
-      } else {
-        // Call API to update the database
-      }
-
-      return updatedCart;
+      const next = prevCart.filter((i) => i.id !== id);
+      persist(next);
+      return next;
     });
+  };
+
+  const clearCart = () => {
+    setCart([]);
+    persist([]);
   };
 
   return (
@@ -90,6 +98,8 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         addToCart,
         toggleCart,
         removeFromCart,
+        updateQuantity,
+        clearCart,
       }}
     >
       {children}

@@ -1,7 +1,12 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
-const SocialMediaAuth = ({ googleAuth, facebookAuth }) => {
+interface SocialMediaAuthProps {
+  googleAuth: () => void;
+  facebookAuth: () => void;
+}
+
+const SocialMediaAuth = ({ googleAuth, facebookAuth }: SocialMediaAuthProps) => {
   return (
     <>
       {" "}

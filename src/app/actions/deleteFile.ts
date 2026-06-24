@@ -17,8 +17,7 @@ export async function deleteFile(fileId: string) {
     }
 
     return { success: true };
-  } catch (error) {
-    console.error("Error deleting file:", error.message);
+  } catch {
     return { success: false };
   }
 }

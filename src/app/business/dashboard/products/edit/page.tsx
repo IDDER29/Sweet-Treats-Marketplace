@@ -4,14 +4,19 @@ import React, { useEffect, useReducer, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import UploadThing from "@/components/upload/UploadButton";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import for toast notifications
+import { toast } from "react-toastify";
 import Section from "@/components/reusable-component/Section";
 import InputField from "@/components/reusable-component/InputField";
 import TextareaField from "@/components/reusable-component/TextareaField";
 import SelectField from "@/components/reusable-component/SelectField";
 import Tooltip from "@/components/reusable-component/Tooltip"; // Tooltip component
+import { LoadingState } from "@/components/feedback/LoadingState";
 import { getProductById, updateProduct } from "@/utils/api";
+import {
+  PRODUCT_CATEGORIES,
+  DIETARY_LABELS,
+  AVAILABILITY_OPTIONS,
+} from "@/config";
 import { useRouter, useSearchParams } from "next/navigation"; // Correct usage of useRouter from Next.js 13
 
 interface ImageObject {
@@ -20,16 +25,18 @@ interface ImageObject {
   key: string;
 }
 
-// Reducer to manage image state (add, delete)
-const imageReducer = (state: ImageObject[], action: any) => {
+type ImageAction =
+  | { type: "ADD_IMAGES"; payload: ImageObject[] }
+  | { type: "DELETE_IMAGE"; payload: string };
+
+const imageReducer = (state: ImageObject[], action: ImageAction): ImageObject[] => {
   switch (action.type) {
     case "ADD_IMAGES":
-      // Replace the current images with the new ones from the payload (avoid duplication)
       return [
-        ...new Set(
+        ...new Set<string>(
           action.payload.map((img: ImageObject) => JSON.stringify(img))
         ),
-      ].map((img) => JSON.parse(img));
+      ].map((img: string) => JSON.parse(img));
     case "DELETE_IMAGE":
       return state.filter((img) => img.key !== action.payload);
     default:
@@ -56,6 +63,7 @@ export default function EditProductPage() {
   const [productVariations, setProductVariations] = useState("");
   const [productCustomization, setProductCustomization] = useState("");
   const [seasonalAvailability, setSeasonalAvailability] = useState("");
+  const [availabilityStatus, setAvailabilityStatus] = useState("In Stock");
   const [images, dispatch] = useReducer(imageReducer, []);
   const [loading, setLoading] = useState(true);
 
@@ -89,6 +97,9 @@ export default function EditProductPage() {
         setProductVariations(product.variations);
         setProductCustomization(product.customizationOptions);
         setSeasonalAvailability(product.seasonalAvailability);
+        if (product.availability) {
+          setAvailabilityStatus(product.availability);
+        }
 
         // Replace images with the fetched product's images
         dispatch({
@@ -114,8 +125,10 @@ export default function EditProductPage() {
     toast.success("Image deleted successfully!");
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!productId) return;
 
     const updatedProductData = {
       name: productName,
@@ -135,6 +148,7 @@ export default function EditProductPage() {
       variations: productVariations,
       customizationOptions: productCustomization,
       seasonalAvailability: seasonalAvailability,
+      availability: availabilityStatus,
       images: images.map((img) => img),
     };
 
@@ -148,7 +162,11 @@ export default function EditProductPage() {
   };
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState rows={6} />
+      </div>
+    );
   } else {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -172,7 +190,9 @@ export default function EditProductPage() {
                     placeholder="E.g., Chocolate Chip Cookies"
                     required
                     value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductName(e.target.value)
+                    }
                     tooltip={
                       <Tooltip message="Clearly describe the item, including main ingredients and flavors." />
                     }
@@ -186,13 +206,15 @@ export default function EditProductPage() {
                     min="0"
                     required
                     value={productPrice}
-                    onChange={(e) => setProductPrice(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductPrice(e.target.value)
+                    }
                   />
                 </div>
                 <SelectField
                   id="product-category"
                   label="Category *"
-                  options={["Bread", "Pastry", "Cake", "Cookie"]}
+                  options={[...PRODUCT_CATEGORIES]}
                   value={productCategory}
                   onChange={(value) => setProductCategory(value)} // Directly use value
                   required
@@ -202,7 +224,9 @@ export default function EditProductPage() {
                   label="Product Description"
                   placeholder="E.g., Soft, chewy cookies with rich chocolate chips."
                   value={productDescription}
-                  onChange={(e) => setProductDescription(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setProductDescription(e.target.value)
+                  }
                   tooltip={
                     <Tooltip message="Provide details about the product's texture, taste, and characteristics." />
                   }
@@ -216,7 +240,9 @@ export default function EditProductPage() {
                   label="Ingredients *"
                   placeholder="E.g., Flour, Sugar, Butter, Chocolate Chips"
                   value={productIngredients}
-                  onChange={(e) => setProductIngredients(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setProductIngredients(e.target.value)
+                  }
                   tooltip={
                     <Tooltip message="List all ingredients, highlighting allergens." />
                   }
@@ -226,7 +252,9 @@ export default function EditProductPage() {
                   label="Allergens"
                   placeholder="E.g., Contains Dairy, Gluten"
                   value={productAllergens}
-                  onChange={(e) => setProductAllergens(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setProductAllergens(e.target.value)
+                  }
                   tooltip={
                     <Tooltip message="Specify any allergens, such as nuts or gluten." />
                   }
@@ -234,7 +262,7 @@ export default function EditProductPage() {
                 <SelectField
                   id="dietary-label"
                   label="Dietary Labels"
-                  options={["None", "Gluten-Free", "Vegan", "Sugar-Free"]}
+                  options={[...DIETARY_LABELS]}
                   value={dietaryLabel}
                   onChange={(value) => setDietaryLabel(value)} // Directly use value
                 />
@@ -250,14 +278,18 @@ export default function EditProductPage() {
                     type="number"
                     placeholder="E.g., 250"
                     value={productCalories}
-                    onChange={(e) => setProductCalories(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductCalories(e.target.value)
+                    }
                   />
                   <InputField
                     id="product-macronutrients"
                     label="Macronutrients"
                     placeholder="E.g., 12g Fat, 20g Carbs, 5g Protein"
                     value={productMacronutrients}
-                    onChange={(e) => setProductMacronutrients(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductMacronutrients(e.target.value)
+                    }
                     tooltip={
                       <Tooltip message="Include a breakdown of macronutrients if available." />
                     }
@@ -273,7 +305,9 @@ export default function EditProductPage() {
                     label="Size"
                     placeholder="E.g., Medium"
                     value={productSize}
-                    onChange={(e) => setProductSize(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductSize(e.target.value)
+                    }
                     tooltip={
                       <Tooltip message="Specify the product size (e.g., Small, Medium, Large)." />
                     }
@@ -283,14 +317,18 @@ export default function EditProductPage() {
                     label="Weight"
                     placeholder="E.g., 500g"
                     value={productWeight}
-                    onChange={(e) => setProductWeight(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductWeight(e.target.value)
+                    }
                   />
                   <InputField
                     id="product-shelf-life"
                     label="Shelf Life"
                     placeholder="E.g., 1 week"
                     value={productShelfLife}
-                    onChange={(e) => setProductShelfLife(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setProductShelfLife(e.target.value)
+                    }
                     tooltip={
                       <Tooltip message="Indicate how long the product stays fresh." />
                     }
@@ -301,7 +339,7 @@ export default function EditProductPage() {
                   label="Storage Instructions"
                   placeholder="E.g., Keep refrigerated."
                   value={productStorageInstructions}
-                  onChange={(e) =>
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setProductStorageInstructions(e.target.value)
                   }
                 />
@@ -314,7 +352,9 @@ export default function EditProductPage() {
                   label="Serving Suggestions"
                   placeholder="E.g., Serve warm with a glass of milk."
                   value={productServing}
-                  onChange={(e) => setProductServing(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setProductServing(e.target.value)
+                  }
                 />
               </Section>
 
@@ -325,14 +365,18 @@ export default function EditProductPage() {
                   label="Available Variations"
                   placeholder="E.g., Different flavors or sizes."
                   value={productVariations}
-                  onChange={(e) => setProductVariations(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setProductVariations(e.target.value)
+                  }
                 />
                 <InputField
                   id="product-customization"
                   label="Customization Options"
                   placeholder="E.g., Custom orders for birthdays."
                   value={productCustomization}
-                  onChange={(e) => setProductCustomization(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setProductCustomization(e.target.value)
+                  }
                 />
               </Section>
 
@@ -344,6 +388,17 @@ export default function EditProductPage() {
                   options={["Year-round", "Seasonal"]}
                   value={seasonalAvailability}
                   onChange={(value) => setSeasonalAvailability(value)} // Directly use value
+                />
+              </Section>
+
+              {/* Section: Availability Status */}
+              <Section title="Availability Status">
+                <SelectField
+                  id="availability"
+                  label="Availability Status"
+                  options={[...AVAILABILITY_OPTIONS]}
+                  value={availabilityStatus}
+                  onChange={(value) => setAvailabilityStatus(value)} // Directly use value
                 />
               </Section>
               {/* Section: Product Images */}
@@ -364,8 +419,6 @@ export default function EditProductPage() {
             </form>
           </CardContent>
         </Card>
-
-        <ToastContainer />
       </div>
     );
   }

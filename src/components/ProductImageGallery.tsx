@@ -5,8 +5,12 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
 
+interface GalleryImage {
+  url: string;
+}
+
 interface ProductImageGalleryProps {
-  images: string[];
+  images: GalleryImage[];
 }
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
@@ -19,8 +23,6 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
     slidesToShow: 1,
     slidesToScroll: 1,
   };
-  console.log(images[0].url);
-
   return (
     <div className="product-image-gallery">
       <Slider {...settings}>

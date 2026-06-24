@@ -8,6 +8,21 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dispatch, SetStateAction } from "react";
+
+interface DietaryPreferences {
+  "gluten-free": boolean;
+  vegan: boolean;
+}
+
+interface FiltersProps {
+  priceRange: number[];
+  setPriceRange: (value: number[]) => void;
+  selectedCategory: string;
+  setSelectedCategory: (value: string) => void;
+  dietaryPreferences: DietaryPreferences;
+  setDietaryPreferences: Dispatch<SetStateAction<DietaryPreferences>>;
+}
 
 export default function Filters({
   priceRange,
@@ -16,7 +31,7 @@ export default function Filters({
   setSelectedCategory,
   dietaryPreferences,
   setDietaryPreferences,
-}) {
+}: FiltersProps) {
   return (
     <div className="flex flex-wrap gap-4">
       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -52,7 +67,7 @@ export default function Filters({
             onCheckedChange={(checked) =>
               setDietaryPreferences((prev) => ({
                 ...prev,
-                "gluten-free": checked,
+                "gluten-free": !!checked,
               }))
             }
           />
@@ -62,7 +77,7 @@ export default function Filters({
           <Checkbox
             checked={dietaryPreferences["vegan"]}
             onCheckedChange={(checked) =>
-              setDietaryPreferences((prev) => ({ ...prev, vegan: checked }))
+              setDietaryPreferences((prev) => ({ ...prev, vegan: !!checked }))
             }
           />
           <span>Vegan</span>
