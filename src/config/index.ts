@@ -75,9 +75,10 @@ export interface NavLink {
 export const MAIN_NAV: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Products", href: "/products" },
+  { label: "Collections", href: "/collections" },
   { label: "Stores", href: "/stores" },
+  { label: "Deals", href: "/deals" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
@@ -85,6 +86,9 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
     title: "Shop",
     links: [
       { label: "All Products", href: "/products" },
+      { label: "Collections", href: "/collections" },
+      { label: "Deals & Offers", href: "/deals" },
+      { label: "Gift Guide", href: "/gift-guide" },
       { label: "Stores", href: "/stores" },
     ],
   },
@@ -92,6 +96,9 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
     title: "Company",
     links: [
       { label: "About Us", href: "/about" },
+      { label: "How It Works", href: "/how-it-works" },
+      { label: "Sell on Sweet Treats", href: "/sell" },
+      { label: "Blog", href: "/blog" },
       { label: "Contact", href: "/contact" },
       { label: "FAQ", href: "/FAQ" },
     ],
@@ -101,6 +108,8 @@ export const FOOTER_NAV: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
+      { label: "Refund Policy", href: "/refund-policy" },
+      { label: "Sitemap", href: "/sitemap" },
     ],
   },
 ];
