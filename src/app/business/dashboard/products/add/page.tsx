@@ -35,8 +35,11 @@ interface ImageObject {
   key: string;
 }
 
-// Reducer to manage image state (add, delete)
-const imageReducer = (state: ImageObject[], action: any) => {
+type ImageAction =
+  | { type: "ADD_IMAGES"; payload: ImageObject[] }
+  | { type: "DELETE_IMAGE"; payload: string };
+
+const imageReducer = (state: ImageObject[], action: ImageAction): ImageObject[] => {
   switch (action.type) {
     case "ADD_IMAGES":
       return [...state, ...action.payload];

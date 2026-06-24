@@ -7,6 +7,8 @@ import { CakeSlice, CheckCircle2, Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { publicApi } from "@/lib/api-client";
+import { toast } from "react-toastify";
 
 export default function UnsubscribePage() {
   const searchParams = useSearchParams();
@@ -19,10 +21,14 @@ export default function UnsubscribePage() {
   async function handleUnsubscribe(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    // TODO(backend): POST { email } to /newsletter/unsubscribe
-    await new Promise((r) => setTimeout(r, 800));
-    setDone(true);
-    setLoading(false);
+    try {
+      await publicApi.post("/newsletter/unsubscribe", { email });
+      setDone(true);
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

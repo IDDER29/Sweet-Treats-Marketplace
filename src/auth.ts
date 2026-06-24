@@ -15,19 +15,18 @@ export const {
   },
   providers: [
     CredentialsProvider({
-      async authorize(credentials: any) {
-        if (!credentials) {
-          throw new Error("No credentials provided");
+      async authorize(credentials) {
+        const email = typeof credentials?.email === "string" ? credentials.email : undefined;
+        const password = typeof credentials?.password === "string" ? credentials.password : undefined;
+        if (!email || !password) {
+          throw new Error("Missing credentials");
         }
 
         try {
-          const businesses = await getBusinessesByEmail(credentials.email);
+          const businesses = await getBusinessesByEmail(email);
 
           if (businesses?.success) {
-            const response = await businessesLogIn(
-              credentials.email,
-              credentials.password
-            );
+            const response = await businessesLogIn(email, password);
             if (response?.success) {
               return {
                 id: businesses.data.id, // return user details
@@ -41,11 +40,7 @@ export const {
           } else {
             throw new Error("User not found");
           }
-        } catch (error) {
-          console.error(
-            "Authorize error:",
-            error instanceof Error ? error.message : String(error)
-          );
+        } catch {
           throw new Error("Authentication failed");
         }
       },

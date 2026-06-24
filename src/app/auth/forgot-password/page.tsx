@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { publicApi } from "@/lib/api-client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +11,20 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO(backend): POST the email to a password-reset endpoint. The
-    // confirmation below is intentionally generic so we never reveal whether
-    // an account exists for a given address.
-    setSubmitted(true);
+    setLoading(true);
+    try {
+      await publicApi.post("/auth/forgot-password", { email });
+    } catch {
+      // Intentionally silent — always show the "check inbox" confirmation
+      // so we never reveal whether an account exists for this address.
+    } finally {
+      setLoading(false);
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -127,9 +136,10 @@ export default function ForgotPasswordPage() {
                 </div>
                 <Button
                   type="submit"
+                  disabled={loading}
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white"
                 >
-                  Send reset link
+                  {loading ? "Sending…" : "Send reset link"}
                 </Button>
               </form>
             </div>

@@ -14,6 +14,9 @@ import { LocaleProvider } from "@/i18n/LocaleProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXTAUTH_URL ?? "https://sweettreats.example"
+  ),
   title: {
     default: "Sweet Treats Marketplace",
     template: "%s | Sweet Treats Marketplace",

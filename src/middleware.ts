@@ -17,8 +17,41 @@ const SESSION_COOKIES = [
   "__Secure-next-auth.session-token",
 ];
 
+// In-memory rate limiter for the credentials login endpoint.
+// Edge middleware is stateless per invocation — this Map is shared across
+// requests only within the same edge worker instance. For production, replace
+// with an Upstash Redis counter or Cloudflare rate-limiting rule.
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+const RATE_WINDOW_MS = 60_000; // 1 minute
+const MAX_ATTEMPTS = 10; // per IP per window
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record || now > record.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  record.count += 1;
+  return record.count > MAX_ATTEMPTS;
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // Rate-limit credentials login attempts
+  if (pathname === "/api/auth/callback/credentials" && req.method === "POST") {
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      "unknown";
+    if (isRateLimited(ip)) {
+      return new NextResponse(
+        JSON.stringify({ error: "Too many login attempts. Please try again later." }),
+        { status: 429, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
@@ -38,5 +71,6 @@ export const config = {
     "/business/:path*",
     "/delivery-provider/:path*",
     "/customer/:path*",
+    "/api/auth/callback/credentials",
   ],
 };

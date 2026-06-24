@@ -28,6 +28,7 @@ import { toast } from "react-toastify";
 import { PRODUCT_CATEGORIES, DIETARY_LABELS } from "@/config";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 
 interface ProductImage {
   url: string;
@@ -71,21 +72,25 @@ const ProductListingsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      setIsError(false);
+      const response = await getAllProducts();
+      setProducts(Array.isArray(response) ? response : []);
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getAllProducts();
-        setProducts(response);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -350,6 +355,8 @@ const ProductListingsPage: React.FC = () => {
 
           {isLoading ? (
             <LoadingState rows={6} />
+          ) : isError ? (
+            <ErrorState onRetry={fetchProducts} />
           ) : filteredAndSorted.length === 0 ? (
             <EmptyState
               icon={<Search className="h-12 w-12" />}

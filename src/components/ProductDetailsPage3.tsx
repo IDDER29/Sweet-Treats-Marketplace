@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { LoadingState } from "@/components/feedback/LoadingState";
 import { EmptyState } from "@/components/feedback/EmptyState";
+import { ErrorState } from "@/components/feedback/ErrorState";
 import ProductImageGallery from "./products-deties/ProductImageGallery";
 import ProductInformation from "./products-deties/ProductInformation";
 import ReviewsSection from "./products-deties/ReviewsSection";
@@ -29,36 +30,39 @@ interface ProductDetails {
   images: ProductImage[];
 }
 
-// Custom Hook to manage product fetching and state
 const useProductDetails = (productId: string | null) => {
-  const [product, setProduct] = useState<ProductDetails>();
+  const [product, setProduct] = useState<ProductDetails | null>(null);
   const [mainImage, setMainImage] = useState("");
-  const [images, setImages] = useState<ProductImage[]>([]);
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
+    if (!productId) {
+      setLoading(false);
+      return;
+    }
     const fetchProductData = async () => {
-      if (!productId) return;
       try {
-        const product = await getProductById(productId);
-        if (product) {
-          setProduct(product);
-          setMainImage(product.images?.[0]?.url || ""); // Ensure images exist
-          setImages(product.images);
-          setSelectedSize(product.options?.[0] || ""); // Ensure options exist
+        setLoading(true);
+        setIsError(false);
+        const fetched = await getProductById(productId);
+        if (fetched) {
+          setProduct(fetched);
+          setMainImage(fetched.images?.[0]?.url || "");
+          setSelectedSize(fetched.options?.[0] || "");
         } else {
-          throw new Error("Product not found");
+          setProduct(null);
         }
-      } catch (error) {
+      } catch {
+        setIsError(true);
         toast.error("Failed to load product data.");
       } finally {
         setLoading(false);
       }
     };
-
-    if (productId) fetchProductData();
+    fetchProductData();
   }, [productId]);
 
   return {
@@ -70,63 +74,32 @@ const useProductDetails = (productId: string | null) => {
     selectedSize,
     setSelectedSize,
     loading,
-    images,
+    isError,
   };
 };
 
 export default function ProductDetailsPage({ id }: { id?: string }) {
   const searchParams = useSearchParams();
   const productId = id ?? searchParams.get("id");
-  const { product, loading, images } = useProductDetails(productId);
-  const [name, setName] = useState("");
-  const [rating, setRating] = useState(0);
-  const [reviewCount, setReviewCount] = useState(0);
-  const [price, setPrice] = useState(0);
-  const [description, setDescription] = useState("");
-  const [ingredients, setIngredients] = useState("");
-  const [allergens, setAllergens] = useState("");
-  const [size, setSize] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [options, setOptions] = useState<string[]>([]);
+  const { product, loading, isError } = useProductDetails(productId);
 
-  useEffect(() => {
-    if (product) {
-      const {
-        name,
-        rating,
-        reviewCount,
-        price,
-        description,
-        ingredients,
-        allergens,
-        size,
-        availability,
-        options,
-      } = product;
-      setName(name);
-      setRating(rating);
-      setReviewCount(reviewCount);
-      setPrice(price);
-      setDescription(description);
-      setIngredients(ingredients);
-      setAllergens(allergens);
-      setSize(size);
-      setAvailability(availability);
-      setOptions(options);
-    }
-  }, [product]);
-
-  // States for zoom effect and review form
-  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
-
-  if (loading)
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <LoadingState rows={6} />
       </div>
     );
+  }
 
-  if (!product)
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <ErrorState onRetry={() => window.location.reload()} />
+      </div>
+    );
+  }
+
+  if (!product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <EmptyState
@@ -137,42 +110,28 @@ export default function ProductDetailsPage({ id }: { id?: string }) {
         />
       </div>
     );
-
-  const handleSubmitReview = () => {
-    if (newReview.comment.trim().length < 10) {
-      toast.error("Review comment must be at least 10 characters long.");
-      return;
-    }
-    // TODO(Phase 4): submit the review to the reviews API.
-    setNewReview({ rating: 5, comment: "" });
-    toast.success("Review submitted successfully.");
-  };
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Product Image Gallery */}
-        <ProductImageGallery productImageData={images} />
-
-        {/* Product Information */}
+        <ProductImageGallery productImageData={product.images ?? []} />
         <ProductInformation
           productInfoData={{
             id: productId ?? "",
-            name,
-            rating,
-            reviewCount,
-            price,
-            description,
-            ingredients,
-            allergens,
-            size,
-            availability,
-            options,
+            name: product.name,
+            rating: product.rating,
+            reviewCount: product.reviewCount,
+            price: product.price,
+            description: product.description,
+            ingredients: product.ingredients,
+            allergens: product.allergens,
+            size: product.size,
+            availability: product.availability,
+            options: product.options,
           }}
         />
       </div>
-
-      {/* Reviews Section */}
       <ReviewsSection productId={productId ?? undefined} />
     </div>
   );

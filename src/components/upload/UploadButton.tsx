@@ -6,13 +6,19 @@ import Image from "next/image";
 import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify"; // Importing toast
 
+interface UploadedImage {
+  url: string;
+  name: string;
+  key: string;
+}
+
 export default function UploadThing({
   images,
   onAddImages,
   onDeleteImage,
 }: {
-  images: any[];
-  onAddImages: (images: any[]) => void;
+  images: UploadedImage[];
+  onAddImages: (images: UploadedImage[]) => void;
   onDeleteImage: (key: string) => void;
 }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -35,7 +41,7 @@ export default function UploadThing({
       } else {
         toast.error("Failed to delete file");
       }
-    } catch (error) {
+    } catch {
       toast.error("Error deleting file");
     } finally {
       setIsDeleting(false);

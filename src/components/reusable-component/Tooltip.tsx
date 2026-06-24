@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function Tooltip({ message }: any) {
+export default function Tooltip({ message }: { message: string }) {
   return (
     <span className="relative group">
       <span className="text-gray-400 cursor-pointer">ℹ️</span>

@@ -18,7 +18,7 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
   const { data } = await publicApi.get<Review[]>(
     `/products/${productId}/reviews`
   );
-  return data;
+  return Array.isArray(data) ? data : [];
 }
 
 export interface CreateReviewInput {
